@@ -35,6 +35,11 @@ export function renderMenuScreen(root: HTMLElement, app: App): ScreenHandle {
   const settings = renderSettings();
   wrap.appendChild(settings.el);
 
+  const credit = document.createElement('p');
+  credit.className = 'home-credit';
+  credit.textContent = 'credited by hoctusach@gmail.com';
+  wrap.appendChild(credit);
+
   return { destroy: settings.destroy };
 }
 
