@@ -8,12 +8,10 @@ Live: https://hoctusach.github.io/english-shoot-words/
 
 ## Import
 
-Import the same `.xlsx` file you already use with
-[lazy-vocabulary](https://github.com/hoctusach/lazy-vocabulary) — sheets named
-`phrasal verbs`, `idioms`, `topic vocab`, `grammar`, `phrases, collocations` or
-`word formation` (with `Word`/`Meaning` columns, or common aliases such as
-`Term`/`Definition`) are detected automatically. Each detected sheet can be saved as its
-own word set.
+Import a `.csv` or `.xlsx` file with two columns: word, then meaning. No header row is
+needed — every row is read as one word (a leading `Word,Meaning`-style header row is
+skipped automatically if present). Each imported file is saved as a single word set that
+you can rename afterwards from "Saved word sets".
 
 ## Saved sets
 

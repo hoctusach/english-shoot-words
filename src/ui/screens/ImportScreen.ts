@@ -1,16 +1,20 @@
 import type { App } from '@/App';
-import { parseVocabularyXlsx, type ImportedSheet } from '@/data/xlsxImport';
+import { parseWordListFile } from '@/data/wordListImport';
 import { createWordSet, setLastSelectedSetId } from '@/data/wordSetStore';
+import type { WordSetWord } from '@/types/wordset';
+
+function baseName(fileName: string): string {
+  return fileName.replace(/\.[^/.]+$/, '');
+}
 
 export function renderImportScreen(root: HTMLElement, app: App): void {
   const wrap = document.createElement('div');
   wrap.className = 'screen screen-import';
   wrap.innerHTML = `
     <h2>Import word list</h2>
-    <p class="subtitle">Choose the same .xlsx file you use in lazy-vocabulary. Sheets named
-    "phrasal verbs", "idioms", "topic vocab", "grammar", "phrases, collocations" or
-    "word formation" are detected automatically.</p>
-    <input type="file" accept=".xlsx" class="file-input" />
+    <p class="subtitle">Choose a .csv or .xlsx file with two columns: word, then meaning.
+    No header row needed — every row is read as one word.</p>
+    <input type="file" accept=".xlsx,.xls,.csv" class="file-input" />
     <div class="import-results"></div>
     <div class="import-actions"></div>
   `;
@@ -20,7 +24,7 @@ export function renderImportScreen(root: HTMLElement, app: App): void {
   const resultsEl = wrap.querySelector<HTMLDivElement>('.import-results')!;
   const actionsEl = wrap.querySelector<HTMLDivElement>('.import-actions')!;
 
-  let sheets: ImportedSheet[] = [];
+  let words: WordSetWord[] = [];
   let fileName = '';
 
   fileInput.addEventListener('change', async () => {
@@ -30,9 +34,9 @@ export function renderImportScreen(root: HTMLElement, app: App): void {
     resultsEl.textContent = 'Reading file...';
     actionsEl.innerHTML = '';
     try {
-      sheets = await parseVocabularyXlsx(file);
+      words = await parseWordListFile(file);
     } catch {
-      resultsEl.textContent = 'Could not read this file. Make sure it is a valid .xlsx export.';
+      resultsEl.textContent = 'Could not read this file. Make sure it is a valid .csv or .xlsx file.';
       return;
     }
     renderResults();
@@ -41,40 +45,27 @@ export function renderImportScreen(root: HTMLElement, app: App): void {
   function renderResults(): void {
     resultsEl.innerHTML = '';
     actionsEl.innerHTML = '';
-    if (sheets.length === 0) {
-      resultsEl.textContent = 'No recognized sheets found in this file.';
+
+    if (words.length === 0) {
+      resultsEl.textContent = 'No word/meaning rows found in this file.';
       return;
     }
 
-    const list = document.createElement('div');
-    list.className = 'sheet-checklist';
-    for (const sheet of sheets) {
-      const label = document.createElement('label');
-      label.className = 'sheet-checkbox';
-      const checkbox = document.createElement('input');
-      checkbox.type = 'checkbox';
-      checkbox.checked = true;
-      checkbox.dataset.category = sheet.category;
-      label.appendChild(checkbox);
-      label.append(` ${sheet.category} (${sheet.words.length} words)`);
-      list.appendChild(label);
-    }
-    resultsEl.appendChild(list);
+    resultsEl.textContent = `${words.length} words found in ${fileName}`;
+
+    const nameInput = document.createElement('input');
+    nameInput.type = 'text';
+    nameInput.className = 'file-input';
+    nameInput.value = baseName(fileName);
+    actionsEl.appendChild(nameInput);
 
     const saveBtn = document.createElement('button');
     saveBtn.className = 'btn btn-primary';
-    saveBtn.textContent = 'Save selected sets';
+    saveBtn.textContent = 'Save set';
     saveBtn.addEventListener('click', () => {
-      const checkboxes = list.querySelectorAll<HTMLInputElement>('input[type="checkbox"]:checked');
-      let lastCreatedId: string | null = null;
-      checkboxes.forEach((cb) => {
-        const category = cb.dataset.category!;
-        const sheet = sheets.find((s) => s.category === category);
-        if (!sheet) return;
-        const set = createWordSet(`${fileName} — ${category}`, sheet.words, fileName);
-        lastCreatedId = set.id;
-      });
-      if (lastCreatedId) setLastSelectedSetId(lastCreatedId);
+      const name = nameInput.value.trim() || baseName(fileName);
+      const set = createWordSet(name, words, fileName);
+      setLastSelectedSetId(set.id);
       app.showSavedSets();
     });
     actionsEl.appendChild(saveBtn);
