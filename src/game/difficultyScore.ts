@@ -1,3 +1,6 @@
+import type { WordSetWord } from '@/types/wordset';
+import { snapSpeedFactor } from './DifficultyCurve';
+
 function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
 }
@@ -18,11 +21,26 @@ export function wordDifficulty(term: string): number {
   return letters.length * 0.6 + wordCount * 4 + rareLetters * 2 + Math.max(0, vowelGroups - 1) * 1.5;
 }
 
-const EASY_ANCHOR = 6;
-const HARD_ANCHOR = 24;
+const SAMPLE_SIZE = 400;
 
-export function difficultySpeedMultiplier(term: string): number {
-  const difficulty = wordDifficulty(term);
-  const t = clamp((difficulty - EASY_ANCHOR) / (HARD_ANCHOR - EASY_ANCHOR), 0, 1);
-  return 1.25 - t * 0.5; // 1.25x (easy, falls faster) down to 0.75x (hard, falls slower)
+export function averageDifficulty(words: WordSetWord[]): number {
+  if (words.length === 0) return 12;
+  const stride = Math.max(1, Math.floor(words.length / SAMPLE_SIZE));
+  let total = 0;
+  let count = 0;
+  for (let i = 0; i < words.length; i += stride) {
+    total += wordDifficulty(words[i].term);
+    count++;
+  }
+  return total / count;
+}
+
+const EASY_ANCHOR = 7;
+const HARD_ANCHOR = 20;
+
+// An easy set (short, common words) starts brisk; a hard set (long phrases,
+// C1-style vocabulary) starts slower. The player can still override it in game.
+export function defaultSpeedForSet(words: WordSetWord[]): number {
+  const t = clamp((averageDifficulty(words) - EASY_ANCHOR) / (HARD_ANCHOR - EASY_ANCHOR), 0, 1);
+  return snapSpeedFactor(1.3 - t * 0.55);
 }

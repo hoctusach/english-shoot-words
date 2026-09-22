@@ -19,8 +19,8 @@ export function pointsForWord(term: string, level: number): number {
   return Math.round(wordDifficulty(term) * 6 * (1 + level * 0.1));
 }
 
-export function applyKill(state: ScoreState, term: string): ScoreState {
-  const points = pointsForWord(term, state.level);
+export function applyKill(state: ScoreState, term: string, speedMultiplier = 1): ScoreState {
+  const points = Math.round(pointsForWord(term, state.level) * speedMultiplier);
   const killsThisLevel = state.killsThisLevel + 1;
   const levelUp = killsThisLevel >= KILLS_PER_LEVEL;
   return {

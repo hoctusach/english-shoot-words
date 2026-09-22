@@ -1,15 +1,22 @@
 import type { WordSet } from '@/types/wordset';
 import { speak } from '@/audio/pronounce';
 import { playTick, playSuccess } from '@/audio/sfx';
-import { getSpeedSetting, getBackgroundThemeId } from '@/data/settingsStore';
+import { getBackgroundThemeId } from '@/data/settingsStore';
+import { setWordSetSpeedFactor } from '@/data/wordSetStore';
 import { getThemeById } from '@/ui/backgrounds';
 import type { FallingWord } from './FallingWord';
 import { Spawner } from './Spawner';
 import { CanvasRenderer } from './CanvasRenderer';
 import { InputController } from './InputController';
 import { createScoreState, applyKill, applyMiss, type ScoreState } from './Scoring';
-import { spawnIntervalMs, fallSpeedPxPerSec } from './DifficultyCurve';
-import { difficultySpeedMultiplier } from './difficultyScore';
+import {
+  spawnIntervalMs,
+  fallSpeedPxPerSec,
+  speedScoreMultiplier,
+  stepSpeedFactor,
+  snapSpeedFactor,
+} from './DifficultyCurve';
+import { defaultSpeedForSet } from './difficultyScore';
 import {
   type Projectile,
   type Particle,
@@ -25,6 +32,7 @@ export interface GameEngineEvents {
   onScoreChange?: (state: ScoreState) => void;
   onWordKilled?: (word: FallingWord) => void;
   onPauseChange?: (paused: boolean) => void;
+  onSpeedChange?: (factor: number) => void;
   onGameOver?: (finalScore: number, wordsKilled: number) => void;
 }
 
@@ -37,7 +45,8 @@ export class GameEngine {
   private renderer: CanvasRenderer;
   private spawner: Spawner;
   private input: InputController;
-  private speed = getSpeedSetting();
+  private wordSetId: string;
+  private speedFactor: number;
   private activeWords: FallingWord[] = [];
   private projectiles: Projectile[] = [];
   private particles: Particle[] = [];
@@ -59,6 +68,8 @@ export class GameEngine {
     if (!ctx) throw new Error('Canvas 2D context unavailable');
     this.ctx = ctx;
     this.renderer = new CanvasRenderer(canvas, this.ctx, getThemeById(getBackgroundThemeId()));
+    this.wordSetId = wordSet.id;
+    this.speedFactor = snapSpeedFactor(wordSet.speedFactor ?? defaultSpeedForSet(wordSet.words));
     this.spawner = new Spawner(wordSet.words);
     this.input = new InputController(container, (value) => this.handleInput(value));
   }
@@ -69,6 +80,7 @@ export class GameEngine {
     this.lastFrameTime = performance.now();
     this.lastSpawnTime = this.lastFrameTime;
     this.events.onScoreChange?.(this.scoreState);
+    this.events.onSpeedChange?.(this.speedFactor);
     this.input.focus();
     document.addEventListener('visibilitychange', this.handleVisibility);
     window.addEventListener('keydown', this.handleKeydown);
@@ -89,6 +101,19 @@ export class GameEngine {
 
   get isPaused(): boolean {
     return this.paused;
+  }
+
+  get speed(): number {
+    return this.speedFactor;
+  }
+
+  adjustSpeed(direction: 1 | -1): void {
+    const next = stepSpeedFactor(this.speedFactor, direction);
+    if (next === this.speedFactor) return;
+    this.speedFactor = next;
+    setWordSetSpeedFactor(this.wordSetId, next);
+    this.events.onSpeedChange?.(next);
+    this.input.focus();
   }
 
   togglePause(): void {
@@ -141,16 +166,16 @@ export class GameEngine {
   };
 
   private update(time: number, dt: number): void {
-    const interval = spawnIntervalMs(this.scoreState.level, this.speed);
+    const interval = spawnIntervalMs(this.scoreState.level, this.speedFactor);
     if (time - this.lastSpawnTime >= interval) {
       this.trySpawn();
       this.lastSpawnTime = time;
     }
 
-    const baseSpeed = fallSpeedPxPerSec(this.scoreState.level, this.speed);
+    const fallSpeed = fallSpeedPxPerSec(this.scoreState.level, this.speedFactor);
     const heightCss = this.renderer.heightCss;
     for (const word of this.activeWords) {
-      word.y += baseSpeed * word.speedMultiplier * (dt / 1000);
+      word.y += fallSpeed * (dt / 1000);
     }
 
     this.projectiles = advanceProjectiles(this.projectiles, dt);
@@ -204,7 +229,6 @@ export class GameEngine {
       meaning: word.meaning,
       x,
       y: -20,
-      speedMultiplier: difficultySpeedMultiplier(word.term),
     });
   }
 
@@ -259,7 +283,7 @@ export class GameEngine {
     this.resetInput();
     speak(word.term);
     playSuccess();
-    this.scoreState = applyKill(this.scoreState, word.term);
+    this.scoreState = applyKill(this.scoreState, word.term, speedScoreMultiplier(this.speedFactor));
     this.events.onScoreChange?.(this.scoreState);
     this.events.onWordKilled?.(word);
   }

@@ -1,7 +1,6 @@
 import { ScreenManager } from '@/ui/ScreenManager';
 import { renderMenuScreen } from '@/ui/screens/MenuScreen';
 import { renderImportScreen } from '@/ui/screens/ImportScreen';
-import { renderSavedSetsScreen } from '@/ui/screens/SavedSetsScreen';
 import { renderGameScreen } from '@/ui/screens/GameScreen';
 import { renderGameOverScreen } from '@/ui/screens/GameOverScreen';
 import type { WordSet } from '@/types/wordset';
@@ -23,10 +22,6 @@ export class App {
 
   showImport = (): void => {
     this.screens.show((root) => renderImportScreen(root, this));
-  };
-
-  showSavedSets = (): void => {
-    this.screens.show((root) => renderSavedSetsScreen(root, this));
   };
 
   showGame = (wordSet: WordSet): void => {

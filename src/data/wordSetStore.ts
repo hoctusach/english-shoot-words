@@ -56,6 +56,14 @@ export function deleteWordSet(id: string): void {
   }
 }
 
+export function setWordSetSpeedFactor(id: string, factor: number): void {
+  const sets = loadWordSets();
+  const set = sets.find((s) => s.id === id);
+  if (!set) return;
+  set.speedFactor = factor;
+  saveWordSets(sets);
+}
+
 export function recordBestScore(id: string, score: number): void {
   const sets = loadWordSets();
   const set = sets.find((s) => s.id === id);

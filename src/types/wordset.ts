@@ -9,5 +9,6 @@ export interface WordSet {
   words: WordSetWord[];
   createdAt: string;
   bestScore?: number;
+  speedFactor?: number;
   sourceFileName?: string;
 }

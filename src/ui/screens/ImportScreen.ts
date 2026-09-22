@@ -66,7 +66,7 @@ export function renderImportScreen(root: HTMLElement, app: App): void {
       const name = nameInput.value.trim() || baseName(fileName);
       const set = createWordSet(name, words, fileName);
       setLastSelectedSetId(set.id);
-      app.showSavedSets();
+      app.showMenu();
     });
     actionsEl.appendChild(saveBtn);
   }

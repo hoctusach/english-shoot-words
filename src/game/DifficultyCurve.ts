@@ -1,33 +1,36 @@
 export const KILLS_PER_LEVEL = 10;
 
-export type SpeedSetting = 'slow' | 'normal' | 'fast';
+export const SPEED_STEPS = [0.5, 0.65, 0.8, 1, 1.25, 1.5, 1.8, 2.2];
+export const DEFAULT_SPEED_FACTOR = 1;
 
-export const SPEED_SETTINGS: SpeedSetting[] = ['slow', 'normal', 'fast'];
-
-export const SPEED_LABELS: Record<SpeedSetting, string> = {
-  slow: 'Slow',
-  normal: 'Normal',
-  fast: 'Fast',
-};
-
-const INTERVAL_MULTIPLIER: Record<SpeedSetting, number> = {
-  slow: 1.4,
-  normal: 1,
-  fast: 0.75,
-};
-
-const SPEED_MULTIPLIER: Record<SpeedSetting, number> = {
-  slow: 0.7,
-  normal: 1,
-  fast: 1.3,
-};
-
-export function spawnIntervalMs(level: number, speed: SpeedSetting = 'normal'): number {
-  const base = Math.max(600, 2200 - level * 150);
-  return Math.max(400, Math.round(base * INTERVAL_MULTIPLIER[speed]));
+export function snapSpeedFactor(factor: number): number {
+  return SPEED_STEPS.reduce((best, step) =>
+    Math.abs(step - factor) < Math.abs(best - factor) ? step : best,
+  );
 }
 
-export function fallSpeedPxPerSec(level: number, speed: SpeedSetting = 'normal'): number {
-  const base = 40 + level * 8;
-  return Math.round(base * SPEED_MULTIPLIER[speed]);
+export function stepSpeedFactor(factor: number, direction: 1 | -1): number {
+  const index = SPEED_STEPS.indexOf(snapSpeedFactor(factor));
+  const next = Math.min(SPEED_STEPS.length - 1, Math.max(0, index + direction));
+  return SPEED_STEPS[next];
+}
+
+export function formatSpeed(factor: number): string {
+  return `${factor.toFixed(2).replace(/\.?0+$/, '')}×`;
+}
+
+// Every word falls at the same speed — the set's difficulty only picks the
+// starting speed, and the player tunes it from there.
+export function spawnIntervalMs(level: number, factor: number): number {
+  const base = Math.max(700, 2200 - level * 120);
+  return Math.max(350, Math.round(base / factor));
+}
+
+export function fallSpeedPxPerSec(level: number, factor: number): number {
+  const base = 46 + level * 5;
+  return Math.round(base * factor);
+}
+
+export function speedScoreMultiplier(factor: number): number {
+  return factor;
 }

@@ -38,7 +38,7 @@ export function renderGameOverScreen(
   const otherBtn = document.createElement('button');
   otherBtn.className = 'btn';
   otherBtn.textContent = 'Choose another set';
-  otherBtn.addEventListener('click', () => app.showSavedSets());
+  otherBtn.addEventListener('click', () => app.showMenu());
   wrap.appendChild(otherBtn);
 
   const menuBtn = document.createElement('button');
