@@ -482,10 +482,19 @@ body::before {
 
 /* ---------- game ---------- */
 
+body.game-active {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
 .screen-game {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
   padding: 0;
   max-width: none;
-  height: 100vh;
+  height: var(--app-height, 100vh);
   overflow: hidden;
   gap: 0;
 }
@@ -494,34 +503,71 @@ body::before {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 6px;
+  padding: 6px 8px;
+  flex-shrink: 0;
+}
+
+.hud-slot {
+  flex: 1;
+  min-width: 0;
+}
+
+.hud {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   gap: 8px;
-  padding: 8px 12px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.hud-score {
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.hud-level {
+  color: var(--muted);
+}
+
+.hud-lives {
+  font-size: 11px;
+  letter-spacing: -1px;
 }
 
 .speed-control {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 3px;
+  gap: 2px;
+  padding: 2px;
   border-radius: 999px;
   background: var(--panel);
   border: 1px solid var(--border);
+  flex-shrink: 0;
 }
 
 .speed-control .icon-btn {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   border: none;
   background: transparent;
-  font-size: 18px;
+  font-size: 17px;
 }
 
 .speed-value {
-  min-width: 46px;
+  min-width: 40px;
   text-align: center;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--accent);
+}
+
+.game-topbar .icon-btn {
+  width: 32px;
+  height: 32px;
+  font-size: 14px;
+  flex-shrink: 0;
 }
 
 .canvas-container {
@@ -539,21 +585,6 @@ body::before {
 .game-canvas.flash-invalid {
   outline: 3px solid var(--danger);
   outline-offset: -3px;
-}
-
-.hud {
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  right: 8px;
-  display: flex;
-  justify-content: space-between;
-  padding: 8px 12px;
-  background: rgba(5, 7, 15, 0.6);
-  border-radius: 10px;
-  font-size: 14px;
-  pointer-events: none;
-  z-index: 2;
 }
 
 .typing-input {

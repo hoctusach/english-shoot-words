@@ -7,7 +7,6 @@ export interface MeaningToastHandle {
 
 const VISIBLE_MS = 1600;
 const EDGE_PADDING = 8;
-const HUD_HEIGHT = 46;
 
 export function createMeaningToast(container: HTMLElement): MeaningToastHandle {
   const el = document.createElement('div');
@@ -33,7 +32,7 @@ export function createMeaningToast(container: HTMLElement): MeaningToastHandle {
       );
       const belowTop = y + 10;
       const fitsBelow = belowTop + el.offsetHeight + EDGE_PADDING <= bounds.height;
-      const top = Math.max(HUD_HEIGHT, fitsBelow ? belowTop : y - el.offsetHeight - 24);
+      const top = Math.max(EDGE_PADDING, fitsBelow ? belowTop : y - el.offsetHeight - 24);
 
       el.style.left = `${left}px`;
       el.style.top = `${top}px`;

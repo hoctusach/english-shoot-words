@@ -5,6 +5,7 @@ import {
   type Particle,
   projectilePosition,
   turretPosition,
+  bottomMargin,
   TURRET_BARREL_LENGTH,
 } from './effects';
 
@@ -62,8 +63,9 @@ export class CanvasRenderer {
     ctx.strokeStyle = 'rgba(248, 113, 113, 0.35)';
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(0, height - 48);
-    ctx.lineTo(width, height - 48);
+    const dangerY = height - bottomMargin(height);
+    ctx.moveTo(0, dangerY);
+    ctx.lineTo(width, dangerY);
     ctx.stroke();
 
     this.drawWords(scene.words, scene.typedValue);

@@ -4,6 +4,7 @@ import type { ScreenHandle } from '@/ui/ScreenManager';
 import { GameEngine } from '@/game/GameEngine';
 import { createHUD } from '@/ui/components/HUD';
 import { createMeaningToast } from '@/ui/components/MeaningToast';
+import { startViewportTracking } from '@/ui/viewport';
 import { formatSpeed } from '@/game/DifficultyCurve';
 
 export function renderGameScreen(root: HTMLElement, app: App, wordSet: WordSet): ScreenHandle | void {
@@ -22,7 +23,8 @@ export function renderGameScreen(root: HTMLElement, app: App, wordSet: WordSet):
 
   wrap.innerHTML = `
     <div class="game-topbar">
-      <button class="btn btn-sm btn-link quit-btn">← Quit</button>
+      <button class="icon-btn quit-btn" aria-label="Quit">←</button>
+      <div class="hud-slot"></div>
       <div class="speed-control">
         <button class="icon-btn speed-down" aria-label="Slower">−</button>
         <span class="speed-value">1×</span>
@@ -40,12 +42,14 @@ export function renderGameScreen(root: HTMLElement, app: App, wordSet: WordSet):
     </div>
   `;
   root.appendChild(wrap);
+  document.body.classList.add('game-active');
+  const stopViewportTracking = startViewportTracking();
 
   const canvasContainer = wrap.querySelector<HTMLDivElement>('.canvas-container')!;
   const pauseOverlay = wrap.querySelector<HTMLDivElement>('.pause-overlay')!;
   const pauseBtn = wrap.querySelector<HTMLButtonElement>('.pause-btn')!;
   const speedValue = wrap.querySelector<HTMLSpanElement>('.speed-value')!;
-  const hud = createHUD(canvasContainer);
+  const hud = createHUD(wrap.querySelector<HTMLDivElement>('.hud-slot')!);
   const meaningToast = createMeaningToast(canvasContainer);
   const canvas = document.createElement('canvas');
   canvas.className = 'game-canvas';
@@ -79,6 +83,8 @@ export function renderGameScreen(root: HTMLElement, app: App, wordSet: WordSet):
       engine.destroy();
       hud.destroy();
       meaningToast.destroy();
+      stopViewportTracking();
+      document.body.classList.remove('game-active');
     },
   };
 }

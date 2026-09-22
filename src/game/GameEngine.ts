@@ -25,6 +25,7 @@ import {
   createBurst,
   advanceParticles,
   turretPosition,
+  bottomMargin,
   TURRET_BARREL_LENGTH,
 } from './effects';
 
@@ -36,7 +37,6 @@ export interface GameEngineEvents {
   onGameOver?: (finalScore: number, wordsKilled: number) => void;
 }
 
-const BOTTOM_MARGIN = 48;
 const SIDE_MARGIN = 16;
 const WORD_SLOT_WIDTH = 160;
 
@@ -181,7 +181,7 @@ export class GameEngine {
     this.projectiles = advanceProjectiles(this.projectiles, dt);
     this.particles = advanceParticles(this.particles, dt);
 
-    const missed = this.activeWords.filter((w) => w.y >= heightCss - BOTTOM_MARGIN);
+    const missed = this.activeWords.filter((w) => w.y >= heightCss - bottomMargin(heightCss));
     if (missed.length > 0) {
       const missedIds = new Set(missed.map((w) => w.id));
       this.activeWords = this.activeWords.filter((w) => !missedIds.has(w.id));

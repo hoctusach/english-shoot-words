@@ -1,8 +1,17 @@
-export const TURRET_OFFSET_Y = 34;
 export const TURRET_BARREL_LENGTH = 30;
 
+const SHORT_SCREEN = 420;
+
+export function turretOffsetY(height: number): number {
+  return height < SHORT_SCREEN ? 26 : 34;
+}
+
+export function bottomMargin(height: number): number {
+  return height < SHORT_SCREEN ? 36 : 48;
+}
+
 export function turretPosition(width: number, height: number): { x: number; y: number } {
-  return { x: width / 2, y: height - TURRET_OFFSET_Y };
+  return { x: width / 2, y: height - turretOffsetY(height) };
 }
 
 export interface Projectile {

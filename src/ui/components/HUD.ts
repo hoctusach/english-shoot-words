@@ -9,8 +9,8 @@ export function createHUD(container: HTMLElement): Hud {
   const el = document.createElement('div');
   el.className = 'hud';
   el.innerHTML = `
-    <span class="hud-score">Score: 0</span>
-    <span class="hud-level">Level: 1</span>
+    <span class="hud-score">0</span>
+    <span class="hud-level">L1</span>
     <span class="hud-lives">❤️❤️❤️</span>
   `;
   container.appendChild(el);
@@ -21,8 +21,8 @@ export function createHUD(container: HTMLElement): Hud {
 
   return {
     update(state: ScoreState) {
-      scoreEl.textContent = `Score: ${state.score}`;
-      levelEl.textContent = `Level: ${state.level}`;
+      scoreEl.textContent = state.score.toLocaleString();
+      levelEl.textContent = `L${state.level}`;
       livesEl.textContent = '❤️'.repeat(Math.max(0, state.lives));
     },
     destroy() {
