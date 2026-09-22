@@ -22,12 +22,22 @@ export function renderGameScreen(root: HTMLElement, app: App, wordSet: WordSet):
   wrap.innerHTML = `
     <div class="game-topbar">
       <button class="btn btn-sm btn-link quit-btn">← Quit</button>
+      <button class="btn btn-sm pause-btn" aria-label="Pause">⏸</button>
     </div>
-    <div class="canvas-container"></div>
+    <div class="canvas-container">
+      <div class="pause-overlay">
+        <div class="pause-card">
+          <p>Paused</p>
+          <button class="btn btn-primary resume-btn">▶ Resume</button>
+        </div>
+      </div>
+    </div>
   `;
   root.appendChild(wrap);
 
   const canvasContainer = wrap.querySelector<HTMLDivElement>('.canvas-container')!;
+  const pauseOverlay = wrap.querySelector<HTMLDivElement>('.pause-overlay')!;
+  const pauseBtn = wrap.querySelector<HTMLButtonElement>('.pause-btn')!;
   const hud = createHUD(canvasContainer);
   const meaningToast = createMeaningToast(canvasContainer);
   const canvas = document.createElement('canvas');
@@ -36,13 +46,18 @@ export function renderGameScreen(root: HTMLElement, app: App, wordSet: WordSet):
 
   const engine = new GameEngine(canvas, canvasContainer, wordSet, {
     onScoreChange: (state) => hud.update(state),
-    onWordKilled: (word) => meaningToast.show(word.term, word.meaning),
+    onWordKilled: (word) => meaningToast.show(word.term, word.meaning, word.x, word.y),
+    onPauseChange: (paused) => {
+      pauseOverlay.classList.toggle('visible', paused);
+      pauseBtn.textContent = paused ? '▶' : '⏸';
+      pauseBtn.setAttribute('aria-label', paused ? 'Resume' : 'Pause');
+    },
     onGameOver: (score, wordsKilled) => app.showGameOver(wordSet, score, wordsKilled),
   });
 
-  wrap.querySelector('.quit-btn')!.addEventListener('click', () => {
-    app.showSavedSets();
-  });
+  pauseBtn.addEventListener('click', () => engine.togglePause());
+  wrap.querySelector('.resume-btn')!.addEventListener('click', () => engine.togglePause());
+  wrap.querySelector('.quit-btn')!.addEventListener('click', () => app.showSavedSets());
 
   engine.start();
 

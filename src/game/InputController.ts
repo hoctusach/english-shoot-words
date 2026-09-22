@@ -34,6 +34,10 @@ export class InputController {
     this.el.value = '';
   }
 
+  setValue(value: string): void {
+    this.el.value = value;
+  }
+
   get value(): string {
     return this.el.value;
   }

@@ -10,10 +10,21 @@ import { InputController } from './InputController';
 import { createScoreState, applyKill, applyMiss, type ScoreState } from './Scoring';
 import { spawnIntervalMs, fallSpeedPxPerSec } from './DifficultyCurve';
 import { difficultySpeedMultiplier } from './difficultyScore';
+import {
+  type Projectile,
+  type Particle,
+  createProjectile,
+  advanceProjectiles,
+  createBurst,
+  advanceParticles,
+  turretPosition,
+  TURRET_BARREL_LENGTH,
+} from './effects';
 
 export interface GameEngineEvents {
   onScoreChange?: (state: ScoreState) => void;
   onWordKilled?: (word: FallingWord) => void;
+  onPauseChange?: (paused: boolean) => void;
   onGameOver?: (finalScore: number, wordsKilled: number) => void;
 }
 
@@ -28,11 +39,13 @@ export class GameEngine {
   private input: InputController;
   private speed = getSpeedSetting();
   private activeWords: FallingWord[] = [];
+  private projectiles: Projectile[] = [];
+  private particles: Particle[] = [];
   private scoreState: ScoreState = createScoreState();
   private rafId: number | null = null;
   private lastFrameTime = 0;
   private lastSpawnTime = 0;
-  private lastMatchedLen = 0;
+  private validValue = '';
   private running = false;
   private paused = false;
 
@@ -74,6 +87,15 @@ export class GameEngine {
     this.renderer.destroy();
   }
 
+  get isPaused(): boolean {
+    return this.paused;
+  }
+
+  togglePause(): void {
+    if (this.paused) this.resume();
+    else this.pause();
+  }
+
   private handleVisibility = (): void => {
     if (document.hidden) this.pause();
   };
@@ -89,6 +111,7 @@ export class GameEngine {
       cancelAnimationFrame(this.rafId);
       this.rafId = null;
     }
+    this.events.onPauseChange?.(true);
   }
 
   private resume(): void {
@@ -97,11 +120,7 @@ export class GameEngine {
     this.lastFrameTime = performance.now();
     this.input.focus();
     this.rafId = requestAnimationFrame(this.loop);
-  }
-
-  private togglePause(): void {
-    if (this.paused) this.resume();
-    else this.pause();
+    this.events.onPauseChange?.(false);
   }
 
   private loop = (time: number): void => {
@@ -110,7 +129,14 @@ export class GameEngine {
     this.lastFrameTime = time;
     this.update(time, dt);
     if (!this.running) return;
-    this.renderer.render(this.activeWords, this.input.value.trim().toLowerCase(), time);
+    this.renderer.render({
+      words: this.activeWords,
+      typedValue: this.validValue,
+      elapsedMs: time,
+      projectiles: this.projectiles,
+      particles: this.particles,
+      aim: this.aimTarget(),
+    });
     this.rafId = requestAnimationFrame(this.loop);
   };
 
@@ -127,6 +153,9 @@ export class GameEngine {
       word.y += baseSpeed * word.speedMultiplier * (dt / 1000);
     }
 
+    this.projectiles = advanceProjectiles(this.projectiles, dt);
+    this.particles = advanceParticles(this.particles, dt);
+
     const missed = this.activeWords.filter((w) => w.y >= heightCss - BOTTOM_MARGIN);
     if (missed.length > 0) {
       const missedIds = new Set(missed.map((w) => w.id));
@@ -137,8 +166,29 @@ export class GameEngine {
       this.events.onScoreChange?.(this.scoreState);
       if (this.scoreState.lives <= 0) {
         this.gameOver();
+        return;
       }
     }
+
+    // the word being typed can fall off screen — don't leave a dead prefix blocking input
+    if (this.validValue && !this.matchingWords(this.validValue).length) {
+      this.resetInput();
+    }
+  }
+
+  private matchingWords(value: string): FallingWord[] {
+    return this.activeWords.filter((w) => w.term.toLowerCase().startsWith(value));
+  }
+
+  private aimTarget(): { x: number; y: number } | null {
+    const candidates = this.validValue ? this.matchingWords(this.validValue) : this.activeWords;
+    if (candidates.length === 0) return null;
+    return candidates.reduce((lowest, w) => (w.y > lowest.y ? w : lowest));
+  }
+
+  private resetInput(): void {
+    this.validValue = '';
+    this.input.clear();
   }
 
   private trySpawn(): void {
@@ -160,31 +210,53 @@ export class GameEngine {
 
   private handleInput(rawValue: string): void {
     const value = rawValue.trim().toLowerCase();
+
     if (!value) {
-      this.lastMatchedLen = 0;
+      this.validValue = '';
       return;
     }
+
     const exactMatch = this.activeWords.find((w) => w.term.toLowerCase() === value);
     if (exactMatch) {
       this.killWord(exactMatch);
       return;
     }
-    const hasCandidate = this.activeWords.some((w) => w.term.toLowerCase().startsWith(value));
-    if (hasCandidate) {
-      if (value.length > this.lastMatchedLen) {
+
+    const candidates = this.matchingWords(value);
+    if (candidates.length > 0) {
+      const isProgress = value.length > this.validValue.length;
+      this.validValue = value;
+      if (isProgress) {
         playTick();
-        this.lastMatchedLen = value.length;
+        this.fireAt(candidates.reduce((lowest, w) => (w.y > lowest.y ? w : lowest)));
       }
-    } else {
-      this.canvas.classList.add('flash-invalid');
-      window.setTimeout(() => this.canvas.classList.remove('flash-invalid'), 200);
+      return;
     }
+
+    // wrong letter: reject it instead of letting it stick and block every later word
+    this.input.setValue(this.validValue);
+    this.canvas.classList.add('flash-invalid');
+    window.setTimeout(() => this.canvas.classList.remove('flash-invalid'), 200);
+  }
+
+  private fireAt(word: FallingWord): void {
+    const turret = turretPosition(this.renderer.widthCss, this.renderer.heightCss);
+    const angle = Math.atan2(word.y - turret.y, word.x - turret.x);
+    this.projectiles.push(
+      createProjectile(
+        turret.x + Math.cos(angle) * TURRET_BARREL_LENGTH,
+        turret.y + Math.sin(angle) * TURRET_BARREL_LENGTH,
+        word.x,
+        word.y,
+      ),
+    );
   }
 
   private killWord(word: FallingWord): void {
+    this.fireAt(word);
+    this.particles.push(...createBurst(word.x, word.y));
     this.activeWords = this.activeWords.filter((w) => w.id !== word.id);
-    this.input.clear();
-    this.lastMatchedLen = 0;
+    this.resetInput();
     speak(word.term);
     playSuccess();
     this.scoreState = applyKill(this.scoreState, word.term);

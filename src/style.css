@@ -278,33 +278,91 @@ body {
   font-size: 15px;
 }
 
-.meaning-toast {
+.meaning-bubble {
   position: absolute;
-  left: 50%;
-  bottom: 64px;
-  transform: translate(-50%, 8px);
-  padding: 10px 16px;
-  background: rgba(5, 7, 15, 0.85);
-  border: 1px solid rgba(74, 222, 128, 0.5);
+  left: 0;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-width: 190px;
+  padding: 6px 10px;
+  background: rgba(5, 7, 15, 0.92);
+  border: 1px solid rgba(74, 222, 128, 0.55);
   border-radius: 10px;
-  font-size: 15px;
-  white-space: nowrap;
   opacity: 0;
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transform: translateY(6px);
+  transition: opacity 0.18s ease, transform 0.18s ease;
   pointer-events: none;
   z-index: 3;
 }
 
-.meaning-toast.visible {
+.meaning-bubble.visible {
   opacity: 1;
-  transform: translate(-50%, 0);
+  transform: translateY(0);
 }
 
-.meaning-toast-term {
+.meaning-bubble-term {
   color: var(--accent);
   font-weight: 700;
+  font-size: 13px;
+  line-height: 1.2;
 }
 
-.meaning-toast-meaning {
+.meaning-bubble-meaning {
   color: var(--text);
+  font-size: 12px;
+  line-height: 1.25;
+}
+
+.game-topbar {
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pause-btn {
+  min-width: 40px;
+  text-align: center;
+}
+
+.pause-overlay {
+  position: absolute;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(5, 7, 15, 0.7);
+  z-index: 4;
+}
+
+.pause-overlay.visible {
+  display: flex;
+}
+
+.pause-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 28px;
+  background: var(--panel);
+  border-radius: 12px;
+}
+
+.pause-card p {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.voice-select {
+  flex: 1;
+  min-width: 0;
+  max-width: 190px;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 13px;
 }

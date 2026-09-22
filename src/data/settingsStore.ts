@@ -1,4 +1,4 @@
-import { SPEED_KEY, BACKGROUND_THEME_KEY } from '@/utils/storageKeys';
+import { SPEED_KEY, BACKGROUND_THEME_KEY, VOICE_KEY } from '@/utils/storageKeys';
 import { type SpeedSetting, SPEED_SETTINGS } from '@/game/DifficultyCurve';
 import { BACKGROUND_THEMES } from '@/ui/backgrounds';
 
@@ -26,4 +26,14 @@ export function getBackgroundThemeId(): string {
 export function setBackgroundThemeId(id: string): void {
   if (!hasLocalStorage()) return;
   localStorage.setItem(BACKGROUND_THEME_KEY, id);
+}
+
+export function getVoiceName(): string {
+  if (!hasLocalStorage()) return '';
+  return localStorage.getItem(VOICE_KEY) ?? '';
+}
+
+export function setVoiceName(name: string): void {
+  if (!hasLocalStorage()) return;
+  localStorage.setItem(VOICE_KEY, name);
 }

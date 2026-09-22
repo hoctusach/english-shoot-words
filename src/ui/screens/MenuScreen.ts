@@ -1,12 +1,15 @@
 import type { App } from '@/App';
+import type { ScreenHandle } from '@/ui/ScreenManager';
 import { getLastSelectedSetId, getWordSet } from '@/data/wordSetStore';
 import { getSpeedSetting, setSpeedSetting, getBackgroundThemeId, setBackgroundThemeId } from '@/data/settingsStore';
 import { SPEED_SETTINGS, SPEED_LABELS, type SpeedSetting } from '@/game/DifficultyCurve';
 import { BACKGROUND_THEMES, getThemeById } from '@/ui/backgrounds';
 import { getStats, setPlayerName } from '@/data/statsStore';
+import { getVoiceName, setVoiceName } from '@/data/settingsStore';
+import { getEnglishVoices, onVoicesReady, speak } from '@/audio/pronounce';
 import { escapeHtml } from '@/utils/dom';
 
-export function renderMenuScreen(root: HTMLElement, app: App): void {
+export function renderMenuScreen(root: HTMLElement, app: App): ScreenHandle {
   const wrap = document.createElement('div');
   wrap.className = 'screen screen-menu';
   wrap.innerHTML = `
@@ -98,6 +101,49 @@ export function renderMenuScreen(root: HTMLElement, app: App): void {
   bgRow.append(bgLabel, bgSwatch, bgPrevBtn, bgName, bgNextBtn);
   settings.appendChild(bgRow);
 
+  const voiceRow = document.createElement('div');
+  voiceRow.className = 'settings-row';
+  const voiceLabel = document.createElement('span');
+  voiceLabel.className = 'settings-label';
+  voiceLabel.textContent = 'Voice';
+  const voiceSelect = document.createElement('select');
+  voiceSelect.className = 'voice-select';
+  const testBtn = document.createElement('button');
+  testBtn.className = 'btn btn-sm';
+  testBtn.textContent = '▶';
+  testBtn.setAttribute('aria-label', 'Test voice');
+
+  const fillVoices = () => {
+    const voices = getEnglishVoices();
+    const saved = getVoiceName();
+    voiceSelect.innerHTML = '';
+    if (voices.length === 0) {
+      const option = document.createElement('option');
+      option.textContent = 'Device default';
+      option.value = '';
+      voiceSelect.appendChild(option);
+      return;
+    }
+    for (const voice of voices) {
+      const option = document.createElement('option');
+      option.value = voice.name;
+      option.textContent = `${voice.name} (${voice.lang})`;
+      if (voice.name === saved) option.selected = true;
+      voiceSelect.appendChild(option);
+    }
+  };
+  fillVoices();
+  const stopVoiceWatch = onVoicesReady(fillVoices);
+
+  voiceSelect.addEventListener('change', () => {
+    setVoiceName(voiceSelect.value);
+    speak('ready', voiceSelect.value);
+  });
+  testBtn.addEventListener('click', () => speak('shoot the word', voiceSelect.value));
+
+  voiceRow.append(voiceLabel, voiceSelect, testBtn);
+  settings.appendChild(voiceRow);
+
   wrap.appendChild(settings);
 
   const statsPanel = document.createElement('div');
@@ -125,4 +171,6 @@ export function renderMenuScreen(root: HTMLElement, app: App): void {
   };
   renderStats();
   wrap.appendChild(statsPanel);
+
+  return { destroy: stopVoiceWatch };
 }
