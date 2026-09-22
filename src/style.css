@@ -351,26 +351,20 @@ body::before {
   flex-shrink: 0;
 }
 
-.settings-block {
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--panel);
-  padding: 4px 14px;
-  margin-top: 6px;
-}
-
-.settings-block summary {
-  cursor: pointer;
-  padding: 10px 0;
-  font-size: 14px;
-  color: var(--muted);
-}
-
-.settings-body {
+.settings-section {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding-bottom: 12px;
+}
+
+.settings-block {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--panel);
 }
 
 .settings-row {

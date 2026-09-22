@@ -194,13 +194,13 @@ function renderSetCard(set: WordSet, app: App, refresh: () => void): HTMLElement
 }
 
 function renderSettings(): { el: HTMLElement; destroy: () => void } {
-  const details = document.createElement('details');
-  details.className = 'settings-block';
-  details.innerHTML = '<summary>Settings</summary>';
+  const section = document.createElement('section');
+  section.className = 'settings-section';
+  section.innerHTML = '<div class="section-head"><h2>Settings</h2></div>';
 
   const body = document.createElement('div');
-  body.className = 'settings-body';
-  details.appendChild(body);
+  body.className = 'settings-block';
+  section.appendChild(body);
 
   // background theme
   const bgRow = document.createElement('div');
@@ -276,5 +276,5 @@ function renderSettings(): { el: HTMLElement; destroy: () => void } {
   voiceRow.append(voiceSelect, testBtn);
   body.appendChild(voiceRow);
 
-  return { el: details, destroy: stopVoiceWatch };
+  return { el: section, destroy: stopVoiceWatch };
 }
