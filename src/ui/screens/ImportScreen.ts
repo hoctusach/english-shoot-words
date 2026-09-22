@@ -2,6 +2,7 @@ import type { App } from '@/App';
 import { parseWordListFile } from '@/data/wordListImport';
 import { createWordSet, setLastSelectedSetId } from '@/data/wordSetStore';
 import type { WordSetWord } from '@/types/wordset';
+import { t } from '@/i18n';
 
 function baseName(fileName: string): string {
   return fileName.replace(/\.[^/.]+$/, '');
@@ -11,9 +12,8 @@ export function renderImportScreen(root: HTMLElement, app: App): void {
   const wrap = document.createElement('div');
   wrap.className = 'screen screen-import';
   wrap.innerHTML = `
-    <h2>Import word list</h2>
-    <p class="subtitle">Choose a .csv or .xlsx file with two columns: word, then meaning.
-    No header row needed — every row is read as one word.</p>
+    <h2>${t('importTitle')}</h2>
+    <p class="subtitle">${t('importHint')}</p>
     <input type="file" accept=".xlsx,.xls,.csv" class="file-input" />
     <div class="import-results"></div>
     <div class="import-actions"></div>
@@ -31,12 +31,12 @@ export function renderImportScreen(root: HTMLElement, app: App): void {
     const file = fileInput.files?.[0];
     if (!file) return;
     fileName = file.name;
-    resultsEl.textContent = 'Reading file...';
+    resultsEl.textContent = t('reading');
     actionsEl.innerHTML = '';
     try {
       words = await parseWordListFile(file);
     } catch {
-      resultsEl.textContent = 'Could not read this file. Make sure it is a valid .csv or .xlsx file.';
+      resultsEl.textContent = t('readError');
       return;
     }
     renderResults();
@@ -47,11 +47,11 @@ export function renderImportScreen(root: HTMLElement, app: App): void {
     actionsEl.innerHTML = '';
 
     if (words.length === 0) {
-      resultsEl.textContent = 'No word/meaning rows found in this file.';
+      resultsEl.textContent = t('noRows');
       return;
     }
 
-    resultsEl.textContent = `${words.length} words found in ${fileName}`;
+    resultsEl.textContent = t('wordsFound', words.length, fileName);
 
     const nameInput = document.createElement('input');
     nameInput.type = 'text';
@@ -60,8 +60,8 @@ export function renderImportScreen(root: HTMLElement, app: App): void {
     actionsEl.appendChild(nameInput);
 
     const saveBtn = document.createElement('button');
-    saveBtn.className = 'btn btn-primary';
-    saveBtn.textContent = 'Save set';
+    saveBtn.className = 'btn btn-primary save-set-btn';
+    saveBtn.textContent = t('saveSet');
     saveBtn.addEventListener('click', () => {
       const name = nameInput.value.trim() || baseName(fileName);
       const set = createWordSet(name, words, fileName);
@@ -73,7 +73,7 @@ export function renderImportScreen(root: HTMLElement, app: App): void {
 
   const backBtn = document.createElement('button');
   backBtn.className = 'btn btn-link';
-  backBtn.textContent = '← Back';
+  backBtn.textContent = t('back');
   backBtn.addEventListener('click', () => app.showMenu());
   wrap.appendChild(backBtn);
 }

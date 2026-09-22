@@ -6,6 +6,7 @@ import { createHUD } from '@/ui/components/HUD';
 import { createMeaningToast } from '@/ui/components/MeaningToast';
 import { startViewportTracking } from '@/ui/viewport';
 import { formatSpeed } from '@/game/DifficultyCurve';
+import { t } from '@/i18n';
 
 export function renderGameScreen(root: HTMLElement, app: App, wordSet: WordSet): ScreenHandle | void {
   const wrap = document.createElement('div');
@@ -13,8 +14,8 @@ export function renderGameScreen(root: HTMLElement, app: App, wordSet: WordSet):
 
   if (wordSet.words.length === 0) {
     wrap.innerHTML = `
-      <div class="game-topbar"><button class="btn btn-sm btn-link quit-btn">← Back</button></div>
-      <p style="padding: 24px;">This set has no words. Import a word list first.</p>
+      <div class="game-topbar"><button class="btn btn-sm btn-link quit-btn">${t('back')}</button></div>
+      <p style="padding: 24px;">${t('emptySet')}</p>
     `;
     root.appendChild(wrap);
     wrap.querySelector('.quit-btn')!.addEventListener('click', () => app.showMenu());
@@ -23,20 +24,20 @@ export function renderGameScreen(root: HTMLElement, app: App, wordSet: WordSet):
 
   wrap.innerHTML = `
     <div class="game-topbar">
-      <button class="icon-btn quit-btn" aria-label="Quit">←</button>
+      <button class="icon-btn quit-btn" aria-label="${t('quit')}">←</button>
       <div class="hud-slot"></div>
       <div class="speed-control">
-        <button class="icon-btn speed-down" aria-label="Slower">−</button>
+        <button class="icon-btn speed-down" aria-label="${t('slower')}">−</button>
         <span class="speed-value">1×</span>
-        <button class="icon-btn speed-up" aria-label="Faster">+</button>
+        <button class="icon-btn speed-up" aria-label="${t('faster')}">+</button>
       </div>
-      <button class="icon-btn pause-btn" aria-label="Pause">⏸</button>
+      <button class="icon-btn pause-btn" aria-label="${t('pause')}">⏸</button>
     </div>
     <div class="canvas-container">
       <div class="pause-overlay">
         <div class="pause-card">
-          <p>Paused</p>
-          <button class="btn btn-primary resume-btn">▶ Resume</button>
+          <p>${t('paused')}</p>
+          <button class="btn btn-primary resume-btn">${t('resumeBtn')}</button>
         </div>
       </div>
     </div>
@@ -61,11 +62,11 @@ export function renderGameScreen(root: HTMLElement, app: App, wordSet: WordSet):
     onPauseChange: (paused) => {
       pauseOverlay.classList.toggle('visible', paused);
       pauseBtn.textContent = paused ? '▶' : '⏸';
-      pauseBtn.setAttribute('aria-label', paused ? 'Resume' : 'Pause');
+      pauseBtn.setAttribute('aria-label', paused ? t('resume') : t('pause'));
     },
     onSpeedChange: (factor) => {
       speedValue.textContent = formatSpeed(factor);
-      speedValue.title = `Points scale with speed (×${factor})`;
+      speedValue.title = t('speedHint', factor);
     },
     onGameOver: (score, wordsKilled) => app.showGameOver(wordSet, score, wordsKilled),
   });

@@ -14,6 +14,7 @@ import { getStats, setPlayerName } from '@/data/statsStore';
 import { getEnglishVoices, onVoicesReady, speak } from '@/audio/pronounce';
 import { defaultSpeedForSet } from '@/game/difficultyScore';
 import { formatSpeed } from '@/game/DifficultyCurve';
+import { t, getLang, setLang, LANGS, type Lang } from '@/i18n';
 import { escapeHtml } from '@/utils/dom';
 
 export function renderMenuScreen(root: HTMLElement, app: App): ScreenHandle {
@@ -21,9 +22,9 @@ export function renderMenuScreen(root: HTMLElement, app: App): ScreenHandle {
   wrap.className = 'screen screen-home';
   root.appendChild(wrap);
 
-  wrap.appendChild(renderHero());
-  const statsBar = renderStats();
-  wrap.appendChild(statsBar.el);
+  wrap.appendChild(renderHero(app));
+  wrap.appendChild(renderNote());
+  wrap.appendChild(renderStats().el);
   wrap.appendChild(renderContinue(app));
 
   const setsSection = document.createElement('section');
@@ -37,7 +38,7 @@ export function renderMenuScreen(root: HTMLElement, app: App): ScreenHandle {
   return { destroy: settings.destroy };
 }
 
-function renderHero(): HTMLElement {
+function renderHero(app: App): HTMLElement {
   const hero = document.createElement('header');
   hero.className = 'hero';
   hero.innerHTML = `
@@ -52,9 +53,34 @@ function renderHero(): HTMLElement {
       </svg>
     </div>
     <h1>English <span>Shoot</span> Words</h1>
-    <p>Type the falling word to shoot it down — your own vocabulary, your own pace.</p>
+    <p>${t('tagline')}</p>
   `;
+
+  const toggle = document.createElement('div');
+  toggle.className = 'lang-toggle';
+  const current = getLang();
+  for (const lang of LANGS) {
+    const btn = document.createElement('button');
+    btn.className = `lang-option${lang === current ? ' active' : ''}`;
+    btn.textContent = lang.toUpperCase();
+    btn.setAttribute('aria-label', lang === 'vi' ? 'Tiếng Việt' : 'English');
+    btn.addEventListener('click', () => {
+      if (lang === getLang()) return;
+      setLang(lang as Lang);
+      app.showMenu();
+    });
+    toggle.appendChild(btn);
+  }
+  hero.appendChild(toggle);
+
   return hero;
+}
+
+function renderNote(): HTMLElement {
+  const note = document.createElement('p');
+  note.className = 'home-note';
+  note.innerHTML = `<span aria-hidden="true">💡</span><span>${t('note')}</span>`;
+  return note;
 }
 
 function renderStats(): { el: HTMLElement } {
@@ -65,13 +91,13 @@ function renderStats(): { el: HTMLElement } {
     const stats = getStats();
     el.innerHTML = `
       <button class="chip chip-player" type="button">
-        <span>Player</span><strong>${escapeHtml(stats.playerName)}</strong>
+        <span>${t('player')}</span><strong>${escapeHtml(stats.playerName)}</strong>
       </button>
-      <div class="chip"><span>Total score</span><strong>${stats.totalScore.toLocaleString()}</strong></div>
-      <div class="chip"><span>Words shot</span><strong>${stats.totalWordsShot.toLocaleString()}</strong></div>
+      <div class="chip"><span>${t('totalScore')}</span><strong>${stats.totalScore.toLocaleString()}</strong></div>
+      <div class="chip"><span>${t('wordsShot')}</span><strong>${stats.totalWordsShot.toLocaleString()}</strong></div>
     `;
     el.querySelector<HTMLButtonElement>('.chip-player')!.addEventListener('click', () => {
-      const name = prompt('Your name', stats.playerName);
+      const name = prompt(t('yourName'), stats.playerName);
       if (name && name.trim()) {
         setPlayerName(name.trim());
         draw();
@@ -94,7 +120,7 @@ function renderContinue(app: App): HTMLElement {
   btn.innerHTML = `
     <span class="cta-icon">▶</span>
     <span class="cta-text">
-      <span class="cta-title">Continue</span>
+      <span class="cta-title">${t('continue')}</span>
       <span class="cta-sub">${escapeHtml(lastSet.name)}</span>
     </span>
   `;
@@ -107,7 +133,7 @@ function renderSets(section: HTMLElement, app: App): void {
   const sets = loadWordSets();
   section.innerHTML = `
     <div class="section-head">
-      <h2>Word sets</h2>
+      <h2>${t('wordSets')}</h2>
       <span class="section-count">${sets.length}</span>
     </div>
   `;
@@ -119,7 +145,7 @@ function renderSets(section: HTMLElement, app: App): void {
   if (sets.length === 0) {
     const empty = document.createElement('p');
     empty.className = 'empty';
-    empty.textContent = 'No sets yet — import a word list to start playing.';
+    empty.textContent = t('noSets');
     list.appendChild(empty);
   }
 
@@ -129,7 +155,7 @@ function renderSets(section: HTMLElement, app: App): void {
 
   const importCard = document.createElement('button');
   importCard.className = 'import-card';
-  importCard.innerHTML = `<span class="import-plus">+</span><span>Import word list<small>.csv or .xlsx — word, meaning</small></span>`;
+  importCard.innerHTML = `<span class="import-plus">+</span><span>${t('importTitle')}<small>${t('importSub')}</small></span>`;
   importCard.addEventListener('click', () => app.showImport());
   section.appendChild(importCard);
 }
@@ -140,9 +166,9 @@ function renderSetCard(set: WordSet, app: App, refresh: () => void): HTMLElement
 
   const speed = set.speedFactor ?? defaultSpeedForSet(set.words);
   const meta = [
-    `${set.words.length.toLocaleString()} words`,
+    t('words', set.words.length.toLocaleString()),
     formatSpeed(speed),
-    set.bestScore !== undefined ? `★ ${set.bestScore.toLocaleString()}` : null,
+    set.bestScore !== undefined ? t('best', set.bestScore.toLocaleString()) : null,
   ]
     .filter(Boolean)
     .join(' · ');
@@ -157,7 +183,7 @@ function renderSetCard(set: WordSet, app: App, refresh: () => void): HTMLElement
 
   const playBtn = document.createElement('button');
   playBtn.className = 'play-btn';
-  playBtn.innerHTML = '▶ Play';
+  playBtn.textContent = t('play');
   playBtn.addEventListener('click', () => {
     setLastSelectedSetId(set.id);
     app.showGame(set);
@@ -165,11 +191,11 @@ function renderSetCard(set: WordSet, app: App, refresh: () => void): HTMLElement
 
   const renameBtn = document.createElement('button');
   renameBtn.className = 'icon-btn';
-  renameBtn.title = 'Rename';
-  renameBtn.setAttribute('aria-label', 'Rename');
+  renameBtn.title = t('rename');
+  renameBtn.setAttribute('aria-label', t('rename'));
   renameBtn.textContent = '✎';
   renameBtn.addEventListener('click', () => {
-    const name = prompt('New name', set.name);
+    const name = prompt(t('newName'), set.name);
     if (name && name.trim()) {
       renameWordSet(set.id, name.trim());
       refresh();
@@ -178,11 +204,11 @@ function renderSetCard(set: WordSet, app: App, refresh: () => void): HTMLElement
 
   const deleteBtn = document.createElement('button');
   deleteBtn.className = 'icon-btn icon-btn-danger';
-  deleteBtn.title = 'Delete';
-  deleteBtn.setAttribute('aria-label', 'Delete');
+  deleteBtn.title = t('delete');
+  deleteBtn.setAttribute('aria-label', t('delete'));
   deleteBtn.textContent = '🗑';
   deleteBtn.addEventListener('click', () => {
-    if (confirm(`Delete "${set.name}"?`)) {
+    if (confirm(t('deleteConfirm', set.name))) {
       deleteWordSet(set.id);
       refresh();
     }
@@ -196,7 +222,7 @@ function renderSetCard(set: WordSet, app: App, refresh: () => void): HTMLElement
 function renderSettings(): { el: HTMLElement; destroy: () => void } {
   const section = document.createElement('section');
   section.className = 'settings-section';
-  section.innerHTML = '<div class="section-head"><h2>Settings</h2></div>';
+  section.innerHTML = `<div class="section-head"><h2>${t('settings')}</h2></div>`;
 
   const body = document.createElement('div');
   body.className = 'settings-block';
@@ -205,7 +231,7 @@ function renderSettings(): { el: HTMLElement; destroy: () => void } {
   // background theme
   const bgRow = document.createElement('div');
   bgRow.className = 'settings-row';
-  bgRow.innerHTML = '<span class="settings-label">Background</span>';
+  bgRow.innerHTML = `<span class="settings-label">${t('background')}</span>`;
   const bgSwatch = document.createElement('div');
   bgSwatch.className = 'bg-swatch';
   const bgPrev = document.createElement('button');
@@ -219,7 +245,7 @@ function renderSettings(): { el: HTMLElement; destroy: () => void } {
   bgNext.textContent = '▸';
   bgNext.setAttribute('aria-label', 'Next background');
 
-  let themeIndex = Math.max(0, BACKGROUND_THEMES.findIndex((t) => t.id === getBackgroundThemeId()));
+  let themeIndex = Math.max(0, BACKGROUND_THEMES.findIndex((theme) => theme.id === getBackgroundThemeId()));
   const drawTheme = () => {
     const theme = BACKGROUND_THEMES[themeIndex];
     bgSwatch.style.background = theme.previewCss;
@@ -239,7 +265,7 @@ function renderSettings(): { el: HTMLElement; destroy: () => void } {
   // voice
   const voiceRow = document.createElement('div');
   voiceRow.className = 'settings-row';
-  voiceRow.innerHTML = '<span class="settings-label">Voice</span>';
+  voiceRow.innerHTML = `<span class="settings-label">${t('voice')}</span>`;
   const voiceSelect = document.createElement('select');
   voiceSelect.className = 'voice-select';
   const testBtn = document.createElement('button');
@@ -253,7 +279,7 @@ function renderSettings(): { el: HTMLElement; destroy: () => void } {
     voiceSelect.innerHTML = '';
     if (voices.length === 0) {
       const option = document.createElement('option');
-      option.textContent = 'Device default';
+      option.textContent = t('deviceVoice');
       option.value = '';
       voiceSelect.appendChild(option);
       return;

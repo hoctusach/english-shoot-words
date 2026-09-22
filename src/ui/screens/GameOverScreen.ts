@@ -3,6 +3,7 @@ import type { WordSet } from '@/types/wordset';
 import { getWordSet, recordBestScore } from '@/data/wordSetStore';
 import { addRoundResult } from '@/data/statsStore';
 import { escapeHtml } from '@/utils/dom';
+import { t } from '@/i18n';
 
 export function renderGameOverScreen(
   root: HTMLElement,
@@ -18,32 +19,32 @@ export function renderGameOverScreen(
   const wrap = document.createElement('div');
   wrap.className = 'screen screen-gameover';
   wrap.innerHTML = `
-    <h2>Game over</h2>
-    <p class="final-score">Score: ${score}</p>
-    <p class="best-score">Best for "${escapeHtml(latest.name)}": ${latest.bestScore ?? score}</p>
+    <h2>${t('gameOver')}</h2>
+    <p class="final-score">${t('score', score.toLocaleString())}</p>
+    <p class="best-score">${t('bestFor', escapeHtml(latest.name), (latest.bestScore ?? score).toLocaleString())}</p>
     <div class="stats-panel">
-      <div class="stats-row"><span>Words shot this round</span><strong>${wordsKilled}</strong></div>
-      <div class="stats-row"><span>${escapeHtml(stats.playerName)} — total score</span><strong>${stats.totalScore}</strong></div>
-      <div class="stats-row"><span>Total words shot</span><strong>${stats.totalWordsShot}</strong></div>
+      <div class="stats-row"><span>${t('roundWords')}</span><strong>${wordsKilled}</strong></div>
+      <div class="stats-row"><span>${t('playerTotal', escapeHtml(stats.playerName))}</span><strong>${stats.totalScore.toLocaleString()}</strong></div>
+      <div class="stats-row"><span>${t('totalWordsShot')}</span><strong>${stats.totalWordsShot.toLocaleString()}</strong></div>
     </div>
   `;
   root.appendChild(wrap);
 
   const againBtn = document.createElement('button');
   againBtn.className = 'btn btn-primary';
-  againBtn.textContent = 'Play again';
+  againBtn.textContent = t('playAgain');
   againBtn.addEventListener('click', () => app.showGame(latest));
   wrap.appendChild(againBtn);
 
   const otherBtn = document.createElement('button');
   otherBtn.className = 'btn';
-  otherBtn.textContent = 'Choose another set';
+  otherBtn.textContent = t('anotherSet');
   otherBtn.addEventListener('click', () => app.showMenu());
   wrap.appendChild(otherBtn);
 
   const menuBtn = document.createElement('button');
   menuBtn.className = 'btn btn-link';
-  menuBtn.textContent = 'Menu';
+  menuBtn.textContent = t('menu');
   menuBtn.addEventListener('click', () => app.showMenu());
   wrap.appendChild(menuBtn);
 }

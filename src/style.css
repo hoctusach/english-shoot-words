@@ -57,8 +57,51 @@ body::before {
 /* ---------- home ---------- */
 
 .hero {
+  position: relative;
   text-align: center;
   padding: 8px 0 4px;
+}
+
+.lang-toggle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  padding: 2px;
+  gap: 2px;
+  border-radius: 999px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+}
+
+.lang-option {
+  padding: 5px 10px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.lang-option.active {
+  background: var(--accent);
+  color: #04210f;
+}
+
+.home-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(253, 224, 71, 0.08);
+  border: 1px solid rgba(253, 224, 71, 0.28);
+  color: #fde68a;
+  font-size: 13px;
+  line-height: 1.45;
 }
 
 .hero-mark {
