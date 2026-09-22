@@ -26,9 +26,12 @@ interface KidOptions {
   accessory?: (ctx: CanvasRenderingContext2D, x: number, y: number, scale: number) => void;
 }
 
-function drawKid(ctx: CanvasRenderingContext2D, x: number, y: number, scale: number, opts: KidOptions): void {
+const KID_FEET_OFFSET = 36;
+
+// `feetY` is where the character stands, so it never gets clipped by the bottom edge.
+function drawKid(ctx: CanvasRenderingContext2D, x: number, feetY: number, scale: number, opts: KidOptions): void {
   ctx.save();
-  ctx.translate(x, y);
+  ctx.translate(x, feetY - KID_FEET_OFFSET * scale);
   ctx.scale(scale, scale);
 
   // legs
@@ -90,7 +93,7 @@ const nightSky: BackgroundTheme = {
     ctx.arc(width - 42, 44, 18, 0, Math.PI * 2);
     ctx.fill();
 
-    drawKid(ctx, width - 60, height - 30, 1.2, {
+    drawKid(ctx, width - 60, height - 4, 1.2, {
       skin: '#f5c99b',
       outfit: '#60a5fa',
       hair: '#1f2937',
@@ -132,7 +135,7 @@ const sunnyDay: BackgroundTheme = {
     ctx.lineTo(0, height);
     ctx.fill();
 
-    drawKid(ctx, 60, height - 30, 1.1, {
+    drawKid(ctx, 60, height - 6, 1.1, {
       skin: '#f2b98a',
       outfit: '#f97316',
       hair: '#7c2d12',
@@ -250,7 +253,7 @@ const forestAdventure: BackgroundTheme = {
     };
     [0.18, 0.4, 0.65, 0.85].forEach((f, i) => drawTree(width * f, height - 20, 0.9 + (i % 2) * 0.3));
 
-    drawKid(ctx, width * 0.5, height - 26, 1.1, {
+    drawKid(ctx, width * 0.78, height - 6, 1.1, {
       skin: '#f2b98a',
       outfit: '#22c55e',
       hair: '#78350f',

@@ -6,7 +6,13 @@ export function startViewportTracking(): () => void {
   const viewport = window.visualViewport;
 
   const update = (): void => {
-    const height = viewport?.height ?? window.innerHeight;
+    // Smallest wins: visualViewport shrinks with the mobile keyboard, while
+    // innerHeight/clientHeight stay correct when a desktop browser is zoomed
+    // (where visualViewport can report more than the window actually shows).
+    const candidates = [window.innerHeight, root.clientHeight, viewport?.height].filter(
+      (value): value is number => typeof value === 'number' && value > 0,
+    );
+    const height = Math.min(...candidates);
     root.style.setProperty('--app-height', `${Math.round(height)}px`);
     if (window.scrollY !== 0) window.scrollTo(0, 0);
   };

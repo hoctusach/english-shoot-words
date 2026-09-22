@@ -1,13 +1,18 @@
 export const TURRET_BARREL_LENGTH = 30;
 
-const SHORT_SCREEN = 420;
-
+// The turret and the danger line follow the height of the play area, so they stay
+// clear of the bottom edge on a tall desktop window and still leave room to type
+// on a short one (phone with the keyboard open).
 export function turretOffsetY(height: number): number {
-  return height < SHORT_SCREEN ? 26 : 34;
+  return Math.round(Math.min(52, Math.max(28, height * 0.06)));
+}
+
+export function turretScale(height: number): number {
+  return Math.min(1.35, Math.max(1, height / 700));
 }
 
 export function bottomMargin(height: number): number {
-  return height < SHORT_SCREEN ? 36 : 48;
+  return turretOffsetY(height) + 14;
 }
 
 export function turretPosition(width: number, height: number): { x: number; y: number } {

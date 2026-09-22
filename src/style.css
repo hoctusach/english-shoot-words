@@ -494,7 +494,8 @@ body.game-active {
   right: 0;
   padding: 0;
   max-width: none;
-  height: var(--app-height, 100vh);
+  height: var(--app-height, 100dvh);
+  max-height: 100dvh;
   overflow: hidden;
   gap: 0;
 }
@@ -573,6 +574,7 @@ body.game-active {
 .canvas-container {
   position: relative;
   flex: 1;
+  min-height: 0;
   overflow: hidden;
 }
 

@@ -5,6 +5,7 @@ import {
   type Particle,
   projectilePosition,
   turretPosition,
+  turretScale,
   bottomMargin,
   TURRET_BARREL_LENGTH,
 } from './effects';
@@ -137,9 +138,11 @@ export class CanvasRenderer {
     const ctx = this.ctx;
     const { x, y } = turretPosition(width, height);
     const angle = aim ? Math.atan2(aim.y - y, aim.x - x) : -Math.PI / 2;
+    const scale = turretScale(height);
 
     ctx.save();
     ctx.translate(x, y);
+    ctx.scale(scale, scale);
     ctx.rotate(angle);
     ctx.fillStyle = '#cbd5e1';
     ctx.strokeStyle = 'rgba(5, 7, 15, 0.8)';
@@ -154,22 +157,26 @@ export class CanvasRenderer {
     ctx.fill();
     ctx.restore();
 
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(scale, scale);
     ctx.fillStyle = '#475569';
     ctx.strokeStyle = 'rgba(5, 7, 15, 0.8)';
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.arc(x, y, 20, Math.PI, Math.PI * 2);
+    ctx.arc(0, 0, 20, Math.PI, Math.PI * 2);
     ctx.fill();
     ctx.stroke();
     ctx.fillStyle = '#1e293b';
     ctx.beginPath();
-    ctx.roundRect(x - 28, y, 56, 12, 4);
+    ctx.roundRect(-28, 0, 56, 12, 4);
     ctx.fill();
     ctx.stroke();
     ctx.fillStyle = '#4ade80';
     ctx.beginPath();
-    ctx.arc(x, y, 7, 0, Math.PI * 2);
+    ctx.arc(0, 0, 7, 0, Math.PI * 2);
     ctx.fill();
+    ctx.restore();
   }
 
   destroy(): void {

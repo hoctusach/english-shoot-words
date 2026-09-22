@@ -25,6 +25,7 @@ import {
   createBurst,
   advanceParticles,
   turretPosition,
+  turretScale,
   bottomMargin,
   TURRET_BARREL_LENGTH,
 } from './effects';
@@ -264,12 +265,14 @@ export class GameEngine {
   }
 
   private fireAt(word: FallingWord): void {
-    const turret = turretPosition(this.renderer.widthCss, this.renderer.heightCss);
+    const height = this.renderer.heightCss;
+    const turret = turretPosition(this.renderer.widthCss, height);
     const angle = Math.atan2(word.y - turret.y, word.x - turret.x);
+    const barrel = TURRET_BARREL_LENGTH * turretScale(height);
     this.projectiles.push(
       createProjectile(
-        turret.x + Math.cos(angle) * TURRET_BARREL_LENGTH,
-        turret.y + Math.sin(angle) * TURRET_BARREL_LENGTH,
+        turret.x + Math.cos(angle) * barrel,
+        turret.y + Math.sin(angle) * barrel,
         word.x,
         word.y,
       ),
