@@ -1,4 +1,5 @@
 import type { FallingWord } from './FallingWord';
+import type { BackgroundTheme } from '@/ui/backgrounds';
 
 export class CanvasRenderer {
   private dpr = window.devicePixelRatio || 1;
@@ -7,6 +8,7 @@ export class CanvasRenderer {
   constructor(
     private canvas: HTMLCanvasElement,
     private ctx: CanvasRenderingContext2D,
+    private theme: BackgroundTheme,
   ) {
     this.resizeObserver = new ResizeObserver(() => this.resize());
     this.resizeObserver.observe(canvas.parentElement ?? canvas);
@@ -33,13 +35,12 @@ export class CanvasRenderer {
     this.ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
   }
 
-  render(words: FallingWord[], typedValue: string): void {
+  render(words: FallingWord[], typedValue: string, elapsedMs: number): void {
     const width = this.widthCss;
     const height = this.heightCss;
     this.ctx.clearRect(0, 0, width, height);
 
-    this.ctx.fillStyle = '#0b1020';
-    this.ctx.fillRect(0, 0, width, height);
+    this.theme.paint(this.ctx, width, height, elapsedMs);
 
     this.ctx.strokeStyle = 'rgba(248, 113, 113, 0.35)';
     this.ctx.lineWidth = 2;
@@ -55,16 +56,18 @@ export class CanvasRenderer {
       const rest = word.term.slice(matchLen);
 
       this.ctx.font = '600 20px system-ui, -apple-system, sans-serif';
+      const textWidth = this.ctx.measureText(word.term).width;
+      this.ctx.fillStyle = 'rgba(5, 7, 15, 0.55)';
+      this.ctx.beginPath();
+      this.ctx.roundRect(word.x - 6, word.y - 20, textWidth + 12, 28, 6);
+      this.ctx.fill();
+
       let x = word.x;
       this.ctx.fillStyle = '#4ade80';
       this.ctx.fillText(matched, x, word.y);
       x += this.ctx.measureText(matched).width;
       this.ctx.fillStyle = '#f8fafc';
       this.ctx.fillText(rest, x, word.y);
-
-      this.ctx.font = '400 13px system-ui, -apple-system, sans-serif';
-      this.ctx.fillStyle = '#94a3b8';
-      this.ctx.fillText(word.meaning, word.x, word.y + 18);
     }
   }
 

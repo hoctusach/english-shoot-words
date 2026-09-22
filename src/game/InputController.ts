@@ -1,6 +1,5 @@
 export class InputController {
   readonly el: HTMLInputElement;
-  private flashTimeout: number | null = null;
 
   constructor(
     private container: HTMLElement,
@@ -39,15 +38,7 @@ export class InputController {
     return this.el.value;
   }
 
-  flashInvalid(): void {
-    if (this.flashTimeout !== null) window.clearTimeout(this.flashTimeout);
-    this.flashTimeout = window.setTimeout(() => {
-      this.el.value = '';
-    }, 300);
-  }
-
   destroy(): void {
-    if (this.flashTimeout !== null) window.clearTimeout(this.flashTimeout);
     this.el.removeEventListener('input', this.handleInput);
     this.container.removeEventListener('mousedown', this.refocus);
     this.container.removeEventListener('touchend', this.refocus);

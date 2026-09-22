@@ -1,5 +1,8 @@
 import type { WordSet } from '@/types/wordset';
 import { speak } from '@/audio/pronounce';
+import { playTick, playSuccess } from '@/audio/sfx';
+import { getSpeedSetting, getBackgroundThemeId } from '@/data/settingsStore';
+import { getThemeById } from '@/ui/backgrounds';
 import type { FallingWord } from './FallingWord';
 import { Spawner } from './Spawner';
 import { CanvasRenderer } from './CanvasRenderer';
@@ -9,6 +12,7 @@ import { spawnIntervalMs, fallSpeedPxPerSec } from './DifficultyCurve';
 
 export interface GameEngineEvents {
   onScoreChange?: (state: ScoreState) => void;
+  onWordKilled?: (word: FallingWord) => void;
   onGameOver?: (finalScore: number) => void;
 }
 
@@ -21,11 +25,13 @@ export class GameEngine {
   private renderer: CanvasRenderer;
   private spawner: Spawner;
   private input: InputController;
+  private speed = getSpeedSetting();
   private activeWords: FallingWord[] = [];
   private scoreState: ScoreState = createScoreState();
   private rafId: number | null = null;
   private lastFrameTime = 0;
   private lastSpawnTime = 0;
+  private lastMatchedLen = 0;
   private running = false;
   private paused = false;
 
@@ -38,7 +44,7 @@ export class GameEngine {
     const ctx = canvas.getContext('2d');
     if (!ctx) throw new Error('Canvas 2D context unavailable');
     this.ctx = ctx;
-    this.renderer = new CanvasRenderer(canvas, this.ctx);
+    this.renderer = new CanvasRenderer(canvas, this.ctx, getThemeById(getBackgroundThemeId()));
     this.spawner = new Spawner(wordSet.words);
     this.input = new InputController(container, (value) => this.handleInput(value));
   }
@@ -103,18 +109,18 @@ export class GameEngine {
     this.lastFrameTime = time;
     this.update(time, dt);
     if (!this.running) return;
-    this.renderer.render(this.activeWords, this.input.value.trim().toLowerCase());
+    this.renderer.render(this.activeWords, this.input.value.trim().toLowerCase(), time);
     this.rafId = requestAnimationFrame(this.loop);
   };
 
   private update(time: number, dt: number): void {
-    const interval = spawnIntervalMs(this.scoreState.level);
+    const interval = spawnIntervalMs(this.scoreState.level, this.speed);
     if (time - this.lastSpawnTime >= interval) {
       this.trySpawn();
       this.lastSpawnTime = time;
     }
 
-    const speed = fallSpeedPxPerSec(this.scoreState.level);
+    const speed = fallSpeedPxPerSec(this.scoreState.level, this.speed);
     const heightCss = this.renderer.heightCss;
     for (const word of this.activeWords) {
       word.y += speed * (dt / 1000);
@@ -152,15 +158,22 @@ export class GameEngine {
 
   private handleInput(rawValue: string): void {
     const value = rawValue.trim().toLowerCase();
-    if (!value) return;
+    if (!value) {
+      this.lastMatchedLen = 0;
+      return;
+    }
     const exactMatch = this.activeWords.find((w) => w.term.toLowerCase() === value);
     if (exactMatch) {
       this.killWord(exactMatch);
       return;
     }
     const hasCandidate = this.activeWords.some((w) => w.term.toLowerCase().startsWith(value));
-    if (!hasCandidate) {
-      this.input.flashInvalid();
+    if (hasCandidate) {
+      if (value.length > this.lastMatchedLen) {
+        playTick();
+        this.lastMatchedLen = value.length;
+      }
+    } else {
       this.canvas.classList.add('flash-invalid');
       window.setTimeout(() => this.canvas.classList.remove('flash-invalid'), 200);
     }
@@ -169,9 +182,12 @@ export class GameEngine {
   private killWord(word: FallingWord): void {
     this.activeWords = this.activeWords.filter((w) => w.id !== word.id);
     this.input.clear();
+    this.lastMatchedLen = 0;
     speak(word.term);
+    playSuccess();
     this.scoreState = applyKill(this.scoreState, word.term);
     this.events.onScoreChange?.(this.scoreState);
+    this.events.onWordKilled?.(word);
   }
 
   private gameOver(): void {

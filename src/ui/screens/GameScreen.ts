@@ -3,6 +3,7 @@ import type { WordSet } from '@/types/wordset';
 import type { ScreenHandle } from '@/ui/ScreenManager';
 import { GameEngine } from '@/game/GameEngine';
 import { createHUD } from '@/ui/components/HUD';
+import { createMeaningToast } from '@/ui/components/MeaningToast';
 
 export function renderGameScreen(root: HTMLElement, app: App, wordSet: WordSet): ScreenHandle | void {
   const wrap = document.createElement('div');
@@ -28,12 +29,14 @@ export function renderGameScreen(root: HTMLElement, app: App, wordSet: WordSet):
 
   const canvasContainer = wrap.querySelector<HTMLDivElement>('.canvas-container')!;
   const hud = createHUD(canvasContainer);
+  const meaningToast = createMeaningToast(canvasContainer);
   const canvas = document.createElement('canvas');
   canvas.className = 'game-canvas';
   canvasContainer.appendChild(canvas);
 
   const engine = new GameEngine(canvas, canvasContainer, wordSet, {
     onScoreChange: (state) => hud.update(state),
+    onWordKilled: (word) => meaningToast.show(word.term, word.meaning),
     onGameOver: (score) => app.showGameOver(wordSet, score),
   });
 
@@ -47,6 +50,7 @@ export function renderGameScreen(root: HTMLElement, app: App, wordSet: WordSet):
     destroy() {
       engine.destroy();
       hud.destroy();
+      meaningToast.destroy();
     },
   };
 }
