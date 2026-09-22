@@ -1,0 +1,34 @@
+import { KILLS_PER_LEVEL } from './DifficultyCurve';
+
+export interface ScoreState {
+  score: number;
+  lives: number;
+  level: number;
+  killsThisLevel: number;
+}
+
+export const STARTING_LIVES = 3;
+
+export function createScoreState(): ScoreState {
+  return { score: 0, lives: STARTING_LIVES, level: 1, killsThisLevel: 0 };
+}
+
+export function pointsForWord(term: string, level: number): number {
+  return Math.round(term.length * 10 * (1 + level * 0.1));
+}
+
+export function applyKill(state: ScoreState, term: string): ScoreState {
+  const points = pointsForWord(term, state.level);
+  const killsThisLevel = state.killsThisLevel + 1;
+  const levelUp = killsThisLevel >= KILLS_PER_LEVEL;
+  return {
+    score: state.score + points,
+    lives: state.lives,
+    level: levelUp ? state.level + 1 : state.level,
+    killsThisLevel: levelUp ? 0 : killsThisLevel,
+  };
+}
+
+export function applyMiss(state: ScoreState): ScoreState {
+  return { ...state, lives: Math.max(0, state.lives - 1) };
+}
