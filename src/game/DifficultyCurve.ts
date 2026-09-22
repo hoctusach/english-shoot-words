@@ -22,12 +22,12 @@ export function formatSpeed(factor: number): string {
 // Every word falls at the same speed — the set's difficulty only picks the
 // starting speed, and the player tunes it from there.
 export function spawnIntervalMs(level: number, factor: number): number {
-  const base = Math.max(700, 2200 - level * 120);
-  return Math.max(350, Math.round(base / factor));
+  const base = Math.max(900, 2600 - level * 110);
+  return Math.max(400, Math.round(base / factor));
 }
 
 export function fallSpeedPxPerSec(level: number, factor: number): number {
-  const base = 46 + level * 5;
+  const base = 28 + level * 3.5;
   return Math.round(base * factor);
 }
 
