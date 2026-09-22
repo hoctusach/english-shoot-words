@@ -37,7 +37,7 @@ export function renderGameScreen(root: HTMLElement, app: App, wordSet: WordSet):
   const engine = new GameEngine(canvas, canvasContainer, wordSet, {
     onScoreChange: (state) => hud.update(state),
     onWordKilled: (word) => meaningToast.show(word.term, word.meaning),
-    onGameOver: (score) => app.showGameOver(wordSet, score),
+    onGameOver: (score, wordsKilled) => app.showGameOver(wordSet, score, wordsKilled),
   });
 
   wrap.querySelector('.quit-btn')!.addEventListener('click', () => {

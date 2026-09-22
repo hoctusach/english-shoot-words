@@ -9,11 +9,12 @@ import { CanvasRenderer } from './CanvasRenderer';
 import { InputController } from './InputController';
 import { createScoreState, applyKill, applyMiss, type ScoreState } from './Scoring';
 import { spawnIntervalMs, fallSpeedPxPerSec } from './DifficultyCurve';
+import { difficultySpeedMultiplier } from './difficultyScore';
 
 export interface GameEngineEvents {
   onScoreChange?: (state: ScoreState) => void;
   onWordKilled?: (word: FallingWord) => void;
-  onGameOver?: (finalScore: number) => void;
+  onGameOver?: (finalScore: number, wordsKilled: number) => void;
 }
 
 const BOTTOM_MARGIN = 48;
@@ -120,10 +121,10 @@ export class GameEngine {
       this.lastSpawnTime = time;
     }
 
-    const speed = fallSpeedPxPerSec(this.scoreState.level, this.speed);
+    const baseSpeed = fallSpeedPxPerSec(this.scoreState.level, this.speed);
     const heightCss = this.renderer.heightCss;
     for (const word of this.activeWords) {
-      word.y += speed * (dt / 1000);
+      word.y += baseSpeed * word.speedMultiplier * (dt / 1000);
     }
 
     const missed = this.activeWords.filter((w) => w.y >= heightCss - BOTTOM_MARGIN);
@@ -153,6 +154,7 @@ export class GameEngine {
       meaning: word.meaning,
       x,
       y: -20,
+      speedMultiplier: difficultySpeedMultiplier(word.term),
     });
   }
 
@@ -192,7 +194,8 @@ export class GameEngine {
 
   private gameOver(): void {
     const finalScore = this.scoreState.score;
+    const wordsKilled = this.scoreState.wordsKilled;
     this.destroy();
-    this.events.onGameOver?.(finalScore);
+    this.events.onGameOver?.(finalScore, wordsKilled);
   }
 }

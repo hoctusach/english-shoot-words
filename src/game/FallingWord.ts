@@ -4,4 +4,5 @@ export interface FallingWord {
   meaning: string;
   x: number;
   y: number;
+  speedMultiplier: number;
 }

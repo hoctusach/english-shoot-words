@@ -3,6 +3,8 @@ import { getLastSelectedSetId, getWordSet } from '@/data/wordSetStore';
 import { getSpeedSetting, setSpeedSetting, getBackgroundThemeId, setBackgroundThemeId } from '@/data/settingsStore';
 import { SPEED_SETTINGS, SPEED_LABELS, type SpeedSetting } from '@/game/DifficultyCurve';
 import { BACKGROUND_THEMES, getThemeById } from '@/ui/backgrounds';
+import { getStats, setPlayerName } from '@/data/statsStore';
+import { escapeHtml } from '@/utils/dom';
 
 export function renderMenuScreen(root: HTMLElement, app: App): void {
   const wrap = document.createElement('div');
@@ -97,4 +99,30 @@ export function renderMenuScreen(root: HTMLElement, app: App): void {
   settings.appendChild(bgRow);
 
   wrap.appendChild(settings);
+
+  const statsPanel = document.createElement('div');
+  statsPanel.className = 'stats-panel';
+  const renderStats = () => {
+    const stats = getStats();
+    statsPanel.innerHTML = `
+      <div class="stats-row">
+        <span>Player</span><strong class="player-name">${escapeHtml(stats.playerName)}</strong>
+      </div>
+      <div class="stats-row"><span>Total score</span><strong>${stats.totalScore}</strong></div>
+      <div class="stats-row"><span>Total words shot</span><strong>${stats.totalWordsShot}</strong></div>
+    `;
+    const renameBtn = document.createElement('button');
+    renameBtn.className = 'btn btn-sm btn-link';
+    renameBtn.textContent = 'Change name';
+    renameBtn.addEventListener('click', () => {
+      const name = prompt('Your name', stats.playerName);
+      if (name && name.trim()) {
+        setPlayerName(name.trim());
+        renderStats();
+      }
+    });
+    statsPanel.appendChild(renameBtn);
+  };
+  renderStats();
+  wrap.appendChild(statsPanel);
 }

@@ -33,7 +33,7 @@ export class App {
     this.screens.show((root) => renderGameScreen(root, this, wordSet));
   };
 
-  showGameOver = (wordSet: WordSet, score: number): void => {
-    this.screens.show((root) => renderGameOverScreen(root, this, wordSet, score));
+  showGameOver = (wordSet: WordSet, score: number, wordsKilled: number): void => {
+    this.screens.show((root) => renderGameOverScreen(root, this, wordSet, score, wordsKilled));
   };
 }
