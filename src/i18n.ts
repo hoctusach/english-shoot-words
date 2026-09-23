@@ -67,7 +67,7 @@ const en = {
   unseen: 'Not seen {0}',
   hardest: 'Most missed',
   noMistakes: 'Nothing left to review 🎉',
-  mixHint: 'Each round mixes 1 new word : 3 words to review, most-missed first. A missed word stays in review until you type it right as many times as you missed it.',
+  mixHint: "Each round mixes 1 new word : 3 words you missed last time (most-missed first). A word you type right won't come back this round; if there aren't enough to review, new words fill in.",
 };
 
 type Key = keyof typeof en;
@@ -135,7 +135,7 @@ const vi: Record<Key, string> = {
   unseen: 'Chưa gặp {0}',
   hardest: 'Từ hay sai nhất',
   noMistakes: 'Không còn từ nào cần ôn 🎉',
-  mixHint: 'Mỗi lượt trộn 1 từ mới : 3 từ cần ôn, từ sai nhiều ra trước. Từ đã sai sẽ còn nằm trong danh sách ôn cho đến khi bạn gõ đúng bằng số lần đã sai.',
+  mixHint: 'Mỗi lượt trộn 1 từ mới : 3 từ lần gần nhất bạn gõ sai (sai nhiều ra trước). Từ đã gõ đúng trong ván sẽ không lặp lại; thiếu từ ôn thì lấy thêm từ mới.',
 };
 
 const strings: Record<Lang, Record<Key, string>> = { en, vi };

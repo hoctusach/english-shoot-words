@@ -1,10 +1,12 @@
 import { PROGRESS_KEY_PREFIX } from '@/utils/storageKeys';
 import type { WordSetWord } from '@/types/wordset';
 
-// Per word set, per word: [times shown, times typed correctly]. A word counts as
-// "shown" once it resolves — shot down or fallen off the bottom — so a word still
-// on screen when the player quits stays unseen.
-export type ProgressMap = Record<string, [number, number]>;
+// Per word set, per word: [times shown, times typed correctly, last result
+// (1 = typed right, 0 = missed)]. A word counts as "shown" once it resolves — shot
+// down or fallen off the bottom — so a word still on screen when the player quits
+// stays unseen. Entries saved before the last result was tracked have only two items.
+export type ProgressEntry = [number, number, number?];
+export type ProgressMap = Record<string, ProgressEntry>;
 
 export function termKey(term: string): string {
   return term.trim().toLowerCase();
@@ -40,14 +42,16 @@ export interface WordStat {
   shown: number;
   correct: number;
   misses: number;
-  // misses not yet paid back by correct answers; > 0 means the word still needs review
-  need: number;
+  // the most recent attempt was a miss: the word still needs review
+  lastMissed: boolean;
 }
 
 export function statFor(map: ProgressMap, term: string): WordStat {
-  const [shown, correct] = map[termKey(term)] ?? [0, 0];
+  const [shown, correct, last] = map[termKey(term)] ?? [0, 0];
   const misses = shown - correct;
-  return { shown, correct, misses, need: misses - correct };
+  // older entries without a last result: treat as missed while misses outweigh hits
+  const lastMissed = shown > 0 && (last === undefined ? misses > correct : last === 0);
+  return { shown, correct, misses, lastMissed };
 }
 
 export interface ProgressSummary {
@@ -73,13 +77,13 @@ export function summarizeProgress(words: WordSetWord[], map: ProgressMap, hardes
     const stat = statFor(map, word.term);
     if (stat.shown === 0) continue;
     seen++;
-    if (stat.need > 0) {
+    if (stat.lastMissed) {
       toReview++;
       review.push({ ...word, ...stat });
     }
   }
 
-  review.sort((a, b) => b.need - a.need || b.misses - a.misses);
+  review.sort((a, b) => b.misses - a.misses || a.correct - b.correct);
   return {
     total: unique.size,
     seen,
