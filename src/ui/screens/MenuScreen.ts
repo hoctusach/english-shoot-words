@@ -46,6 +46,11 @@ export function renderMenuScreen(root: HTMLElement, app: App): ScreenHandle {
   credit.textContent = 'credited by hoctusach@gmail.com';
   wrap.appendChild(credit);
 
+  const build = document.createElement('p');
+  build.className = 'home-build';
+  build.textContent = `build ${__BUILD_ID__}`;
+  wrap.appendChild(build);
+
   return { destroy: settings.destroy };
 }
 

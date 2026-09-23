@@ -41,10 +41,12 @@ export interface GameEngineEvents {
   onSpeedChange?: (factor: number) => void;
   onInputFocusChange?: (focused: boolean) => void;
   onSuggestionBlocked?: () => void;
+  onVietnameseInput?: () => void;
   onGameOver?: (finalScore: number, wordsKilled: number) => void;
 }
 
 const SIDE_MARGIN = 16;
+const NON_ASCII = /[^\x00-\x7f]/;
 const EMPTY_SCREEN_SPAWN_MS = 700;
 const WORD_SLOT_WIDTH = 160;
 
@@ -286,6 +288,16 @@ export class GameEngine {
         playTick();
         this.fireAt(candidates.reduce((lowest, w) => (w.y > lowest.y ? w : lowest)));
       }
+      return;
+    }
+
+    // Vietnamese typing (Telex) left on turns w-a-s into "wá". Wiping that back to "wa"
+    // resets the input method, so every retry gives "wá" again. Leave it in the field:
+    // pressing the same key again makes the input method undo it ("wá" + s = "was").
+    if (NON_ASCII.test(value) && value.length <= this.validValue.length + 1) {
+      this.wrongHint = true;
+      this.flashInvalid();
+      this.events.onVietnameseInput?.();
       return;
     }
 

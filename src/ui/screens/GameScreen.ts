@@ -66,7 +66,8 @@ export function renderGameScreen(root: HTMLElement, app: App, wordSet: WordSet):
   let pausedForKeyboard = false;
   let hintTimer: number | undefined;
 
-  const showHint = () => {
+  const showHint = (text: string) => {
+    gameHint.textContent = text;
     gameHint.classList.add('visible');
     window.clearTimeout(hintTimer);
     hintTimer = window.setTimeout(() => gameHint.classList.remove('visible'), 2200);
@@ -100,7 +101,8 @@ export function renderGameScreen(root: HTMLElement, app: App, wordSet: WordSet):
     onInputFocusChange: (focused) => {
       if (!focused) onKeyboardLost();
     },
-    onSuggestionBlocked: showHint,
+    onSuggestionBlocked: () => showHint(t('typeEachLetter')),
+    onVietnameseInput: () => showHint(t('vietnameseOn')),
     onGameOver: (score, wordsKilled) => app.showGameOver(wordSet, score, wordsKilled),
   });
 

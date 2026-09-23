@@ -8,6 +8,8 @@ const BULK_INPUT_TYPES = new Set([
   'insertFromYank',
 ]);
 
+const NON_ASCII = /[^\x00-\x7f]/;
+
 export class InputController {
   readonly el: HTMLInputElement;
   private refocusing = false;
@@ -44,7 +46,10 @@ export class InputController {
   private handleInput = (e: Event): void => {
     const value = this.el.value;
     const inputType = (e as InputEvent).inputType ?? '';
-    if (value.length - this.lastValue.length > 1 || BULK_INPUT_TYPES.has(inputType)) {
+    const grewBy = value.length - this.lastValue.length;
+    // a Vietnamese input method swapping in a toned/accented letter, not a suggestion
+    const vietnameseEdit = inputType === 'insertReplacementText' && grewBy <= 1 && NON_ASCII.test(value);
+    if (grewBy > 1 || (BULK_INPUT_TYPES.has(inputType) && !vietnameseEdit)) {
       this.el.value = this.lastValue;
       this.onBlockedInsert?.();
       return;

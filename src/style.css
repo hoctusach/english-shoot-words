@@ -108,6 +108,14 @@ body::before {
   opacity: 0.75;
 }
 
+.home-build {
+  margin: 4px 0 0;
+  text-align: center;
+  font-size: 10px;
+  color: var(--muted);
+  opacity: 0.45;
+}
+
 .home-note {
   display: flex;
   align-items: flex-start;
