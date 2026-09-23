@@ -742,8 +742,8 @@ body.game-active {
 }
 
 .hud-lives {
-  font-size: 11px;
-  letter-spacing: -1px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
 }
 
 .speed-control {

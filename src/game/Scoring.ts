@@ -9,7 +9,7 @@ export interface ScoreState {
   wordsKilled: number;
 }
 
-export const STARTING_LIVES = 3;
+export const STARTING_LIVES = 30;
 
 export function createScoreState(): ScoreState {
   return { score: 0, lives: STARTING_LIVES, level: 1, killsThisLevel: 0, wordsKilled: 0 };
