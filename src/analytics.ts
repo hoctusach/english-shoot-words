@@ -5,7 +5,7 @@
 //
 // To turn it on: create a website at https://cloud.umami.is, then paste its
 // Website ID below. While it is empty, nothing is loaded or sent.
-const UMAMI_WEBSITE_ID = '';
+const UMAMI_WEBSITE_ID = 'c51f7d4d-f8a4-49cc-8617-3cc0f1c3d5b3';
 const UMAMI_SCRIPT = 'https://cloud.umami.is/script.js';
 // only the real site counts, not local testing
 const UMAMI_DOMAINS = 'hoctusach.github.io';
