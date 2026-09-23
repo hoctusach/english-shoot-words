@@ -90,6 +90,15 @@ body::before {
   color: #04210f;
 }
 
+.home-storage-note {
+  margin: 18px auto 0;
+  max-width: 560px;
+  text-align: center;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
 .home-credit {
   margin: 10px 0 0;
   text-align: center;

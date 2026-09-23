@@ -68,6 +68,8 @@ const en = {
   unseen: 'Not seen {0}',
   hardest: 'Most missed',
   noMistakes: 'Nothing left to review 🎉',
+  storageWarning:
+    "⚠️ Don't clear this browser's cache / site data — all saved word sets, learning progress and settings would be lost.",
   mixHint: "Each round mixes 1 new word : 3 words you missed last time (most-missed first). A word you type right won't come back this round; if there aren't enough to review, new words fill in.",
 };
 
@@ -137,6 +139,8 @@ const vi: Record<Key, string> = {
   unseen: 'Chưa gặp {0}',
   hardest: 'Từ hay sai nhất',
   noMistakes: 'Không còn từ nào cần ôn 🎉',
+  storageWarning:
+    '⚠️ Đừng xoá bộ nhớ đệm (cache) / dữ liệu trang web trên máy — mọi bộ từ, tiến độ học và cài đặt đã lưu sẽ bị mất.',
   mixHint: 'Mỗi lượt trộn 1 từ mới : 3 từ lần gần nhất bạn gõ sai (sai nhiều ra trước). Từ đã gõ đúng trong ván sẽ không lặp lại; thiếu từ ôn thì lấy thêm từ mới.',
 };
 
