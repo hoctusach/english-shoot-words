@@ -4,7 +4,7 @@ import type { ScreenHandle } from '@/ui/ScreenManager';
 import { GameEngine } from '@/game/GameEngine';
 import { createHUD } from '@/ui/components/HUD';
 import { createMeaningToast } from '@/ui/components/MeaningToast';
-import { startViewportTracking } from '@/ui/viewport';
+import { startViewportTracking, watchKeyboard } from '@/ui/viewport';
 import { formatSpeed } from '@/game/DifficultyCurve';
 import { t } from '@/i18n';
 
@@ -36,7 +36,7 @@ export function renderGameScreen(root: HTMLElement, app: App, wordSet: WordSet):
     <div class="canvas-container">
       <div class="pause-overlay">
         <div class="pause-card">
-          <p>${t('paused')}</p>
+          <p class="pause-title">${t('paused')}</p>
           <button class="btn btn-primary resume-btn">${t('resumeBtn')}</button>
         </div>
       </div>
@@ -46,8 +46,13 @@ export function renderGameScreen(root: HTMLElement, app: App, wordSet: WordSet):
   document.body.classList.add('game-active');
   const stopViewportTracking = startViewportTracking();
 
+  // No on-screen keyboard to lose on a mouse/trackpad device.
+  const isTouch = window.matchMedia('(pointer: coarse)').matches;
+
   const canvasContainer = wrap.querySelector<HTMLDivElement>('.canvas-container')!;
   const pauseOverlay = wrap.querySelector<HTMLDivElement>('.pause-overlay')!;
+  const pauseTitle = wrap.querySelector<HTMLParagraphElement>('.pause-title')!;
+  const resumeBtn = wrap.querySelector<HTMLButtonElement>('.resume-btn')!;
   const pauseBtn = wrap.querySelector<HTMLButtonElement>('.pause-btn')!;
   const speedValue = wrap.querySelector<HTMLSpanElement>('.speed-value')!;
   const hud = createHUD(wrap.querySelector<HTMLDivElement>('.hud-slot')!);
@@ -56,6 +61,18 @@ export function renderGameScreen(root: HTMLElement, app: App, wordSet: WordSet):
   canvas.className = 'game-canvas';
   canvasContainer.appendChild(canvas);
 
+  let pausedForKeyboard = false;
+
+  // The keyboard disappearing mid-round (hide key, back key, a stray tap) would
+  // otherwise let words keep falling while a child looks for a way to get it back.
+  // Pausing puts one big "open keyboard & play" button in front of them instead.
+  const onKeyboardLost = () => {
+    if (isTouch && !engine.isPaused) {
+      pausedForKeyboard = true;
+      engine.pause();
+    }
+  };
+
   const engine = new GameEngine(canvas, canvasContainer, wordSet, {
     onScoreChange: (state) => hud.update(state),
     onWordKilled: (word) => meaningToast.show(word.term, word.meaning, word.x, word.y),
@@ -63,24 +80,43 @@ export function renderGameScreen(root: HTMLElement, app: App, wordSet: WordSet):
       pauseOverlay.classList.toggle('visible', paused);
       pauseBtn.textContent = paused ? '▶' : '⏸';
       pauseBtn.setAttribute('aria-label', paused ? t('resume') : t('pause'));
+      pauseTitle.textContent = pausedForKeyboard ? t('keyboardHidden') : t('paused');
+      resumeBtn.textContent = pausedForKeyboard ? t('resumeKeyboard') : t('resumeBtn');
+      if (!paused) pausedForKeyboard = false;
     },
     onSpeedChange: (factor) => {
       speedValue.textContent = formatSpeed(factor);
       speedValue.title = t('speedHint', factor);
     },
+    onInputFocusChange: (focused) => {
+      if (!focused) onKeyboardLost();
+    },
     onGameOver: (score, wordsKilled) => app.showGameOver(wordSet, score, wordsKilled),
   });
+
+  const stopKeyboardWatch = watchKeyboard((open) => {
+    if (!open) onKeyboardLost();
+  });
+
+  // Tapping a control must not pull focus off the typing input, or the keyboard closes.
+  wrap.querySelectorAll<HTMLButtonElement>('.game-topbar button').forEach((btn) =>
+    btn.addEventListener('mousedown', (e) => e.preventDefault()),
+  );
 
   wrap.querySelector('.speed-down')!.addEventListener('click', () => engine.adjustSpeed(-1));
   wrap.querySelector('.speed-up')!.addEventListener('click', () => engine.adjustSpeed(1));
   pauseBtn.addEventListener('click', () => engine.togglePause());
-  wrap.querySelector('.resume-btn')!.addEventListener('click', () => engine.togglePause());
+  resumeBtn.addEventListener('click', () => {
+    if (engine.isPaused) engine.togglePause();
+    else engine.focusInput();
+  });
   wrap.querySelector('.quit-btn')!.addEventListener('click', () => app.showMenu());
 
   engine.start();
 
   return {
     destroy() {
+      stopKeyboardWatch();
       engine.destroy();
       hud.destroy();
       meaningToast.destroy();

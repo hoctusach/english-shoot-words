@@ -17,6 +17,7 @@ import {
   speedScoreMultiplier,
   stepSpeedFactor,
   snapSpeedFactor,
+  maxWordsOnScreen,
 } from './DifficultyCurve';
 import { defaultSpeedForSet } from './difficultyScore';
 import {
@@ -37,10 +38,12 @@ export interface GameEngineEvents {
   onWordKilled?: (word: FallingWord) => void;
   onPauseChange?: (paused: boolean) => void;
   onSpeedChange?: (factor: number) => void;
+  onInputFocusChange?: (focused: boolean) => void;
   onGameOver?: (finalScore: number, wordsKilled: number) => void;
 }
 
 const SIDE_MARGIN = 16;
+const EMPTY_SCREEN_SPAWN_MS = 700;
 const WORD_SLOT_WIDTH = 160;
 
 export class GameEngine {
@@ -76,7 +79,11 @@ export class GameEngine {
     this.speedFactor = snapSpeedFactor(wordSet.speedFactor ?? defaultSpeedForSet(wordSet.words));
     this.progress = new ProgressTracker(wordSet.id);
     this.spawner = new Spawner(wordSet.words, this.progress);
-    this.input = new InputController(container, (value) => this.handleInput(value));
+    this.input = new InputController(
+      container,
+      (value) => this.handleInput(value),
+      (focused) => this.events.onInputFocusChange?.(focused),
+    );
   }
 
   start(): void {
@@ -126,6 +133,10 @@ export class GameEngine {
     else this.pause();
   }
 
+  focusInput(): void {
+    this.input.focus();
+  }
+
   private handleVisibility = (): void => {
     if (document.hidden) this.pause();
   };
@@ -134,7 +145,7 @@ export class GameEngine {
     if (e.key === 'Escape') this.togglePause();
   };
 
-  private pause(): void {
+  pause(): void {
     if (!this.running || this.paused) return;
     this.paused = true;
     if (this.rafId !== null) {
@@ -172,7 +183,11 @@ export class GameEngine {
 
   private update(time: number, dt: number): void {
     const interval = spawnIntervalMs(this.scoreState.level, this.speedFactor);
-    if (time - this.lastSpawnTime >= interval) {
+    const sinceSpawn = time - this.lastSpawnTime;
+    const hasRoom = this.activeWords.length < maxWordsOnScreen(this.speedFactor);
+    // don't leave a slow player staring at an empty screen until the next timed spawn
+    const screenEmpty = this.activeWords.length === 0 && sinceSpawn >= EMPTY_SCREEN_SPAWN_MS;
+    if (hasRoom && (sinceSpawn >= interval || screenEmpty)) {
       this.trySpawn();
       this.lastSpawnTime = time;
     }

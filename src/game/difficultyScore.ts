@@ -38,9 +38,10 @@ export function averageDifficulty(words: WordSetWord[]): number {
 const EASY_ANCHOR = 7;
 const HARD_ANCHOR = 20;
 
-// An easy set (short, common words) starts brisk; a hard set (long phrases,
-// C1-style vocabulary) starts slower. The player can still override it in game.
+// Every set starts slow — beginners (often children new to a keyboard) should not
+// be overwhelmed — and harder sets (long phrases, C1-style vocabulary) start
+// slower still. The player can raise it in game.
 export function defaultSpeedForSet(words: WordSetWord[]): number {
   const t = clamp((averageDifficulty(words) - EASY_ANCHOR) / (HARD_ANCHOR - EASY_ANCHOR), 0, 1);
-  return snapSpeedFactor(1.3 - t * 0.55);
+  return snapSpeedFactor(0.5 - t * 0.15);
 }

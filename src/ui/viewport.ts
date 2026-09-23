@@ -31,3 +31,29 @@ export function startViewportTracking(): () => void {
     root.style.removeProperty('--app-height');
   };
 }
+
+const KEYBOARD_OPEN_GAP = 150;
+const KEYBOARD_CLOSED_GAP = 80;
+
+// Reports the on-screen keyboard opening and closing. Only a close that follows an
+// observed open is reported, so browsers that shrink the whole window for the
+// keyboard (where the visual/layout gap never appears) never see a false "closed".
+export function watchKeyboard(onChange: (open: boolean) => void): () => void {
+  const viewport = window.visualViewport;
+  if (!viewport) return () => {};
+
+  let open = false;
+  const check = (): void => {
+    const gap = window.innerHeight - viewport.height;
+    if (!open && gap > KEYBOARD_OPEN_GAP) {
+      open = true;
+      onChange(true);
+    } else if (open && gap < KEYBOARD_CLOSED_GAP) {
+      open = false;
+      onChange(false);
+    }
+  };
+
+  viewport.addEventListener('resize', check);
+  return () => viewport.removeEventListener('resize', check);
+}

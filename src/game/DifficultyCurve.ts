@@ -1,6 +1,6 @@
 export const KILLS_PER_LEVEL = 10;
 
-export const SPEED_STEPS = [0.5, 0.65, 0.8, 1, 1.25, 1.5, 1.8, 2.2];
+export const SPEED_STEPS = [0.25, 0.35, 0.5, 0.65, 0.8, 1, 1.25, 1.5, 1.8, 2.2];
 export const DEFAULT_SPEED_FACTOR = 1;
 
 export function snapSpeedFactor(factor: number): number {
@@ -33,4 +33,12 @@ export function fallSpeedPxPerSec(level: number, factor: number): number {
 
 export function speedScoreMultiplier(factor: number): number {
   return factor;
+}
+
+// Slow play is for children still hunting for keys, so it also keeps the screen
+// uncluttered: fewer words falling at once at the slower steps.
+export function maxWordsOnScreen(factor: number): number {
+  if (factor <= 0.5) return 2;
+  if (factor <= 1) return 3;
+  return 5;
 }
