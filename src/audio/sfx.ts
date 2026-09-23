@@ -39,3 +39,22 @@ export function playSuccess(): void {
   playTone(659.25, 0.08, 0.1, 0.18);
   playTone(783.99, 0.16, 0.16, 0.2);
 }
+
+// a short low thud when a word reaches the danger line
+export function playMiss(): void {
+  const ctx = getContext();
+  if (!ctx) return;
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = 'sine';
+  const start = ctx.currentTime;
+  osc.frequency.setValueAtTime(180, start);
+  osc.frequency.exponentialRampToValueAtTime(70, start + 0.18);
+  gain.gain.setValueAtTime(0, start);
+  gain.gain.linearRampToValueAtTime(0.35, start + 0.01);
+  gain.gain.exponentialRampToValueAtTime(0.001, start + 0.22);
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.start(start);
+  osc.stop(start + 0.25);
+}

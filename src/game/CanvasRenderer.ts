@@ -11,12 +11,20 @@ import {
 } from './effects';
 
 const WORD_FONT = '600 20px system-ui, -apple-system, sans-serif';
+const TARGET_COLOR = '#fde047';
 
 export interface RenderScene {
   words: FallingWord[];
   typedValue: string;
   // a wrong key was pressed: show the letter each candidate word is waiting for in red
   wrongHint: boolean;
+  // the word the turret is aiming at while the child types it
+  targetId: string | null;
+  // 0..1: how close the lowest word is to the danger line
+  dangerLevel: number;
+  // screen shake offset and red flash strength (0..1) after a word hits the line
+  shake: { x: number; y: number };
+  impactFlash: number;
   elapsedMs: number;
   projectiles: Projectile[];
   particles: Particle[];
@@ -63,20 +71,63 @@ export class CanvasRenderer {
     const ctx = this.ctx;
     ctx.clearRect(0, 0, width, height);
 
+    ctx.save();
+    // overscan so the shaken scene never shows a bare edge
+    if (scene.shake.x || scene.shake.y) {
+      ctx.translate(scene.shake.x, scene.shake.y);
+      ctx.scale(1.02, 1.02);
+      ctx.translate(-width * 0.01, -height * 0.01);
+    }
     this.theme.paint(ctx, width, height, scene.elapsedMs);
-
-    ctx.strokeStyle = 'rgba(248, 113, 113, 0.35)';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    const dangerY = height - bottomMargin(height);
-    ctx.moveTo(0, dangerY);
-    ctx.lineTo(width, dangerY);
-    ctx.stroke();
-
-    this.drawWords(scene.words, scene.typedValue, scene.wrongHint, scene.elapsedMs);
+    this.drawDangerLine(width, height - bottomMargin(height), scene.elapsedMs, scene.dangerLevel);
+    this.drawWords(scene.words, scene.typedValue, scene.wrongHint, scene.targetId, scene.elapsedMs);
     this.drawProjectiles(scene.projectiles);
     this.drawParticles(scene.particles);
     this.drawTurret(width, height, scene.aim);
+    ctx.restore();
+
+    if (scene.impactFlash > 0) this.drawImpactFlash(width, height, scene.impactFlash);
+  }
+
+  // A bright red line with a glowing haze above it; the haze grows as a word closes in.
+  private drawDangerLine(width: number, y: number, elapsedMs: number, danger: number): void {
+    const ctx = this.ctx;
+    const breathe = 0.85 + 0.15 * Math.sin(elapsedMs / 600);
+    const hazeHeight = 44 + 44 * danger;
+    const hazeAlpha = (0.5 + 0.3 * danger) * breathe;
+
+    const haze = ctx.createLinearGradient(0, y - hazeHeight, 0, y);
+    haze.addColorStop(0, 'rgba(248, 63, 94, 0)');
+    haze.addColorStop(1, `rgba(248, 63, 94, ${hazeAlpha})`);
+    ctx.fillStyle = haze;
+    ctx.fillRect(0, y - hazeHeight, width, hazeHeight);
+
+    const under = ctx.createLinearGradient(0, y, 0, y + 12);
+    under.addColorStop(0, `rgba(248, 63, 94, ${0.22 * breathe})`);
+    under.addColorStop(1, 'rgba(248, 63, 94, 0)');
+    ctx.fillStyle = under;
+    ctx.fillRect(0, y, width, 12);
+
+    ctx.save();
+    ctx.shadowColor = '#ff4d5e';
+    ctx.shadowBlur = 18 + 10 * danger;
+    ctx.strokeStyle = danger > 0.5 ? '#ff6b78' : '#ff4d5e';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(width, y);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  private drawImpactFlash(width: number, height: number, strength: number): void {
+    const ctx = this.ctx;
+    const r = Math.max(width, height) * 0.75;
+    const flash = ctx.createRadialGradient(width / 2, height / 2, r * 0.45, width / 2, height / 2, r);
+    flash.addColorStop(0, 'rgba(220, 38, 38, 0)');
+    flash.addColorStop(1, `rgba(220, 38, 38, ${0.45 * strength})`);
+    ctx.fillStyle = flash;
+    ctx.fillRect(0, 0, width, height);
   }
 
   measureWordWidth(term: string): number {
@@ -84,7 +135,13 @@ export class CanvasRenderer {
     return this.ctx.measureText(term).width;
   }
 
-  private drawWords(words: FallingWord[], typedValue: string, wrongHint: boolean, elapsedMs: number): void {
+  private drawWords(
+    words: FallingWord[],
+    typedValue: string,
+    wrongHint: boolean,
+    targetId: string | null,
+    elapsedMs: number,
+  ): void {
     const ctx = this.ctx;
     const pulse = 0.5 + 0.5 * Math.sin(elapsedMs / 160);
     for (const word of words) {
@@ -96,12 +153,30 @@ export class CanvasRenderer {
       const next = word.term.slice(matchLen, matchLen + hintLen);
       const rest = word.term.slice(matchLen + hintLen);
 
+      const isTarget = word.id === targetId;
       ctx.font = WORD_FONT;
       const textWidth = ctx.measureText(word.term).width;
-      ctx.fillStyle = 'rgba(5, 7, 15, 0.55)';
+      ctx.save();
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
+      ctx.shadowBlur = 8;
+      ctx.shadowOffsetY = 3;
+      ctx.fillStyle = 'rgba(5, 7, 15, 0.6)';
       ctx.beginPath();
       ctx.roundRect(word.x - 6, word.y - 20, textWidth + 12, 28, 6);
       ctx.fill();
+      ctx.restore();
+      if (isTarget) {
+        // the word being typed: a yellow frame, like a lock-on
+        ctx.save();
+        ctx.shadowColor = 'rgba(253, 224, 71, 0.45)';
+        ctx.shadowBlur = 10;
+        ctx.strokeStyle = TARGET_COLOR;
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.roundRect(word.x - 6, word.y - 20, textWidth + 12, 28, 6);
+        ctx.stroke();
+        ctx.restore();
+      }
 
       let x = word.x;
       ctx.fillStyle = '#4ade80';
@@ -121,7 +196,7 @@ export class CanvasRenderer {
         x += ctx.measureText(next).width;
       }
 
-      ctx.fillStyle = '#f8fafc';
+      ctx.fillStyle = isTarget ? TARGET_COLOR : '#f8fafc';
       ctx.fillText(rest, x, word.y);
     }
   }

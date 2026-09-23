@@ -1,6 +1,6 @@
 import type { WordSet } from '@/types/wordset';
 import { speak } from '@/audio/pronounce';
-import { playTick, playSuccess } from '@/audio/sfx';
+import { playTick, playSuccess, playMiss } from '@/audio/sfx';
 import { getBackgroundThemeId } from '@/data/settingsStore';
 import { setWordSetSpeedFactor } from '@/data/wordSetStore';
 import { getThemeById } from '@/ui/backgrounds';
@@ -27,6 +27,7 @@ import {
   advanceProjectiles,
   createBurst,
   createConfetti,
+  createImpactBurst,
   advanceParticles,
   turretPosition,
   turretScale,
@@ -47,6 +48,10 @@ export interface GameEngineEvents {
 
 const SIDE_MARGIN = 16;
 const NON_ASCII = /[^\x00-\x7f]/;
+const SHAKE_MS = 380;
+const SHAKE_PX = 9;
+// how far above the danger line a word starts to make the line glow harder
+const DANGER_ZONE_PX = 120;
 const EMPTY_SCREEN_SPAWN_MS = 700;
 const WORD_SLOT_WIDTH = 160;
 
@@ -68,6 +73,9 @@ export class GameEngine {
   private validValue = '';
   // a wrong key was pressed and no correct one since: the renderer marks the next letter
   private wrongHint = false;
+  private shakeUntil = 0;
+  // exposed for tests: the offset applied to the scene this frame
+  shakeOffset = { x: 0, y: 0 };
   private running = false;
   private paused = false;
 
@@ -180,10 +188,19 @@ export class GameEngine {
     this.lastFrameTime = time;
     this.update(time, dt);
     if (!this.running) return;
+    const shakeLeft = Math.max(0, this.shakeUntil - time) / SHAKE_MS;
+    const amplitude = SHAKE_PX * shakeLeft * shakeLeft;
+    this.shakeOffset = shakeLeft
+      ? { x: (Math.random() * 2 - 1) * amplitude, y: (Math.random() * 2 - 1) * amplitude }
+      : { x: 0, y: 0 };
     this.renderer.render({
       words: this.activeWords,
       typedValue: this.validValue,
       wrongHint: this.wrongHint,
+      targetId: this.targetWord()?.id ?? null,
+      dangerLevel: this.dangerLevel(),
+      shake: this.shakeOffset,
+      impactFlash: shakeLeft,
       elapsedMs: time,
       projectiles: this.projectiles,
       particles: this.particles,
@@ -219,7 +236,10 @@ export class GameEngine {
       for (const word of missed) {
         this.progress.recordMiss(word.term);
         this.scoreState = applyMiss(this.scoreState);
+        const center = word.x + this.renderer.measureWordWidth(word.term) / 2;
+        this.particles.push(...createImpactBurst(center, heightCss - bottomMargin(heightCss)));
       }
+      this.impact(time);
       this.events.onScoreChange?.(this.scoreState);
       if (this.scoreState.lives <= 0) {
         this.gameOver();
@@ -235,6 +255,33 @@ export class GameEngine {
 
   private matchingWords(value: string): FallingWord[] {
     return this.activeWords.filter((w) => w.term.toLowerCase().startsWith(value));
+  }
+
+  // A word reached the danger line: jolt the screen, flash red, thud, buzz the phone.
+  private impact(time: number): void {
+    this.shakeUntil = time + SHAKE_MS;
+    playMiss();
+    try {
+      navigator.vibrate?.(60);
+    } catch {
+      // vibration blocked or unsupported
+    }
+  }
+
+  private dangerLevel(): number {
+    if (this.activeWords.length === 0) return 0;
+    const height = this.renderer.heightCss;
+    const lowest = Math.max(...this.activeWords.map((w) => w.y));
+    const gap = height - bottomMargin(height) - lowest;
+    return Math.min(1, Math.max(0, 1 - gap / DANGER_ZONE_PX));
+  }
+
+  // the word being typed — the lowest one matching what's typed so far
+  private targetWord(): FallingWord | null {
+    if (!this.validValue) return null;
+    const candidates = this.matchingWords(this.validValue);
+    if (candidates.length === 0) return null;
+    return candidates.reduce((lowest, w) => (w.y > lowest.y ? w : lowest));
   }
 
   private aimTarget(): { x: number; y: number } | null {

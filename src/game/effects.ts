@@ -83,6 +83,27 @@ export function createBurst(x: number, y: number, count = 12): Particle[] {
   return particles;
 }
 
+const IMPACT_COLORS = ['#f87171', '#fb923c', '#ef4444', '#fca5a5'];
+
+// Red sparks spraying up from the danger line where a word hit it.
+export function createImpactBurst(x: number, y: number, count = 16): Particle[] {
+  const particles: Particle[] = [];
+  for (let i = 0; i < count; i++) {
+    const angle = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI * 0.9;
+    const speed = 90 + Math.random() * 130;
+    particles.push({
+      x: x + (Math.random() - 0.5) * 30,
+      y,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed,
+      life: 520,
+      maxLife: 520,
+      color: IMPACT_COLORS[i % IMPACT_COLORS.length],
+    });
+  }
+  return particles;
+}
+
 const CONFETTI_COLORS = ['#f472b6', '#fde047', '#4ade80', '#38bdf8', '#a78bfa', '#fb923c'];
 const CONFETTI_LIFE = 1400;
 

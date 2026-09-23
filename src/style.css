@@ -762,8 +762,22 @@ body.game-active {
 }
 
 .hud-lives {
+  display: inline-block;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
+}
+
+.hud-lives.hud-hit {
+  color: var(--danger);
+  animation: hud-hit 0.45s ease-out;
+}
+
+@keyframes hud-hit {
+  0% { transform: scale(1); }
+  20% { transform: scale(1.35) rotate(-6deg); }
+  40% { transform: scale(1.2) rotate(5deg); }
+  60% { transform: scale(1.1) rotate(-3deg); }
+  100% { transform: scale(1) rotate(0); }
 }
 
 .speed-control {
