@@ -6,6 +6,8 @@ import { setWordSetSpeedFactor } from '@/data/wordSetStore';
 import { getThemeById } from '@/ui/backgrounds';
 import type { FallingWord } from './FallingWord';
 import { Spawner } from './Spawner';
+import { ProgressTracker } from './ProgressTracker';
+import { termKey } from '@/data/progressStore';
 import { CanvasRenderer } from './CanvasRenderer';
 import { InputController } from './InputController';
 import { createScoreState, applyKill, applyMiss, type ScoreState } from './Scoring';
@@ -45,6 +47,7 @@ export class GameEngine {
   private ctx: CanvasRenderingContext2D;
   private renderer: CanvasRenderer;
   private spawner: Spawner;
+  private progress: ProgressTracker;
   private input: InputController;
   private wordSetId: string;
   private speedFactor: number;
@@ -71,7 +74,8 @@ export class GameEngine {
     this.renderer = new CanvasRenderer(canvas, this.ctx, getThemeById(getBackgroundThemeId()));
     this.wordSetId = wordSet.id;
     this.speedFactor = snapSpeedFactor(wordSet.speedFactor ?? defaultSpeedForSet(wordSet.words));
-    this.spawner = new Spawner(wordSet.words);
+    this.progress = new ProgressTracker(wordSet.id);
+    this.spawner = new Spawner(wordSet.words, this.progress);
     this.input = new InputController(container, (value) => this.handleInput(value));
   }
 
@@ -186,7 +190,8 @@ export class GameEngine {
     if (missed.length > 0) {
       const missedIds = new Set(missed.map((w) => w.id));
       this.activeWords = this.activeWords.filter((w) => !missedIds.has(w.id));
-      for (let i = 0; i < missed.length; i++) {
+      for (const word of missed) {
+        this.progress.recordMiss(word.term);
         this.scoreState = applyMiss(this.scoreState);
       }
       this.events.onScoreChange?.(this.scoreState);
@@ -218,7 +223,7 @@ export class GameEngine {
   }
 
   private trySpawn(): void {
-    const activeTerms = new Set(this.activeWords.map((w) => w.term.toLowerCase()));
+    const activeTerms = new Set(this.activeWords.map((w) => termKey(w.term)));
     const word = this.spawner.next(activeTerms);
     if (!word) return;
     const widthCss = this.renderer.widthCss;
@@ -283,6 +288,7 @@ export class GameEngine {
     this.fireAt(word);
     this.particles.push(...createBurst(word.x, word.y));
     this.activeWords = this.activeWords.filter((w) => w.id !== word.id);
+    this.progress.recordCorrect(word.term);
     this.resetInput();
     speak(word.term);
     playSuccess();

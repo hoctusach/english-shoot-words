@@ -54,6 +54,14 @@ const en = {
   anotherSet: 'Choose another set',
   menu: 'Menu',
   speedHint: 'Points scale with speed (×{0})',
+  progress: 'Progress',
+  progressMini: '{0}/{1} seen · {2} to review',
+  learned: 'Learned {0}',
+  toReview: 'To review {0}',
+  unseen: 'Not seen {0}',
+  hardest: 'Most missed',
+  noMistakes: 'Nothing left to review 🎉',
+  mixHint: 'Each round mixes 1 new word : 3 words to review, most-missed first. A missed word stays in review until you type it right as many times as you missed it.',
 };
 
 type Key = keyof typeof en;
@@ -108,6 +116,14 @@ const vi: Record<Key, string> = {
   anotherSet: 'Chọn bộ từ khác',
   menu: 'Trang chủ',
   speedHint: 'Điểm tăng giảm theo tốc độ (×{0})',
+  progress: 'Tiến độ',
+  progressMini: '{0}/{1} đã gặp · {2} cần ôn',
+  learned: 'Đã thuộc {0}',
+  toReview: 'Cần ôn {0}',
+  unseen: 'Chưa gặp {0}',
+  hardest: 'Từ hay sai nhất',
+  noMistakes: 'Không còn từ nào cần ôn 🎉',
+  mixHint: 'Mỗi lượt trộn 1 từ mới : 3 từ cần ôn, từ sai nhiều ra trước. Từ đã sai sẽ còn nằm trong danh sách ôn cho đến khi bạn gõ đúng bằng số lần đã sai.',
 };
 
 const strings: Record<Lang, Record<Key, string>> = { en, vi };

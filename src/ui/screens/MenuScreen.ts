@@ -15,6 +15,7 @@ import { getEnglishVoices, onVoicesReady, speak } from '@/audio/pronounce';
 import { defaultSpeedForSet } from '@/game/difficultyScore';
 import { formatSpeed } from '@/game/DifficultyCurve';
 import { t, getLang, setLang, LANGS, type Lang } from '@/i18n';
+import { loadProgress, summarizeProgress } from '@/data/progressStore';
 import { escapeHtml } from '@/utils/dom';
 
 export function renderMenuScreen(root: HTMLElement, app: App): ScreenHandle {
@@ -221,7 +222,50 @@ function renderSetCard(set: WordSet, app: App, refresh: () => void): HTMLElement
 
   actions.append(renameBtn, deleteBtn, playBtn);
   card.querySelector('.set-card-foot')!.appendChild(actions);
+  card.appendChild(renderProgress(set));
   return card;
+}
+
+function renderProgress(set: WordSet): HTMLElement {
+  const summary = summarizeProgress(set.words, loadProgress(set.id));
+  const pct = (n: number) => (summary.total ? (n / summary.total) * 100 : 0);
+
+  const details = document.createElement('details');
+  details.className = 'set-progress';
+
+  const hardest = summary.hardest.length
+    ? `<ul class="hard-list">${summary.hardest
+        .map(
+          (w) => `
+          <li>
+            <span class="hard-word"><b>${escapeHtml(w.term)}</b>${w.meaning ? ` — ${escapeHtml(w.meaning)}` : ''}</span>
+            <span class="hard-count"><span class="ok">✓${w.correct}</span> <span class="bad">✗${w.misses}</span></span>
+          </li>`,
+        )
+        .join('')}</ul>`
+    : `<p class="progress-empty">${t('noMistakes')}</p>`;
+
+  details.innerHTML = `
+    <summary>
+      <span class="progress-title">📊 ${t('progress')}</span>
+      <span class="progress-mini">${t('progressMini', summary.seen.toLocaleString(), summary.total.toLocaleString(), summary.toReview.toLocaleString())}</span>
+    </summary>
+    <div class="progress-body">
+      <div class="progress-bar" role="img" aria-label="${t('learned', summary.learned)}, ${t('toReview', summary.toReview)}, ${t('unseen', summary.unseen)}">
+        <span class="bar-learned" style="width:${pct(summary.learned)}%"></span>
+        <span class="bar-review" style="width:${pct(summary.toReview)}%"></span>
+      </div>
+      <div class="progress-legend">
+        <span><i class="dot dot-learned"></i>${t('learned', summary.learned.toLocaleString())}</span>
+        <span><i class="dot dot-review"></i>${t('toReview', summary.toReview.toLocaleString())}</span>
+        <span><i class="dot dot-unseen"></i>${t('unseen', summary.unseen.toLocaleString())}</span>
+      </div>
+      <p class="progress-sub">${t('hardest')}</p>
+      ${hardest}
+      <p class="progress-hint">${t('mixHint')}</p>
+    </div>
+  `;
+  return details;
 }
 
 function renderSettings(): { el: HTMLElement; destroy: () => void } {
