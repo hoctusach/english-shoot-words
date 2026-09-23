@@ -26,6 +26,7 @@ import {
   createProjectile,
   advanceProjectiles,
   createBurst,
+  createConfetti,
   advanceParticles,
   turretPosition,
   turretScale,
@@ -63,6 +64,8 @@ export class GameEngine {
   private lastFrameTime = 0;
   private lastSpawnTime = 0;
   private validValue = '';
+  // a wrong key was pressed and no correct one since: the renderer marks the next letter
+  private wrongHint = false;
   private running = false;
   private paused = false;
 
@@ -178,6 +181,7 @@ export class GameEngine {
     this.renderer.render({
       words: this.activeWords,
       typedValue: this.validValue,
+      wrongHint: this.wrongHint,
       elapsedMs: time,
       projectiles: this.projectiles,
       particles: this.particles,
@@ -239,6 +243,7 @@ export class GameEngine {
 
   private resetInput(): void {
     this.validValue = '';
+    this.wrongHint = false;
     this.input.clear();
   }
 
@@ -277,6 +282,7 @@ export class GameEngine {
       const isProgress = value.length > this.validValue.length;
       this.validValue = value;
       if (isProgress) {
+        this.wrongHint = false;
         playTick();
         this.fireAt(candidates.reduce((lowest, w) => (w.y > lowest.y ? w : lowest)));
       }
@@ -285,6 +291,7 @@ export class GameEngine {
 
     // wrong letter: reject it instead of letting it stick and block every later word
     this.input.setValue(this.validValue);
+    this.wrongHint = true;
     this.flashInvalid();
   }
 
@@ -311,6 +318,7 @@ export class GameEngine {
   private killWord(word: FallingWord): void {
     this.fireAt(word);
     this.particles.push(...createBurst(word.x, word.y));
+    this.particles.push(...createConfetti(word.x + this.renderer.measureWordWidth(word.term) / 2, word.y - 8));
     this.activeWords = this.activeWords.filter((w) => w.id !== word.id);
     this.progress.recordCorrect(word.term);
     this.resetInput();

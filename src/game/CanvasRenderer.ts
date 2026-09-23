@@ -10,9 +10,13 @@ import {
   TURRET_BARREL_LENGTH,
 } from './effects';
 
+const WORD_FONT = '600 20px system-ui, -apple-system, sans-serif';
+
 export interface RenderScene {
   words: FallingWord[];
   typedValue: string;
+  // a wrong key was pressed: show the letter each candidate word is waiting for in red
+  wrongHint: boolean;
   elapsedMs: number;
   projectiles: Projectile[];
   particles: Particle[];
@@ -69,21 +73,30 @@ export class CanvasRenderer {
     ctx.lineTo(width, dangerY);
     ctx.stroke();
 
-    this.drawWords(scene.words, scene.typedValue);
+    this.drawWords(scene.words, scene.typedValue, scene.wrongHint, scene.elapsedMs);
     this.drawProjectiles(scene.projectiles);
     this.drawParticles(scene.particles);
     this.drawTurret(width, height, scene.aim);
   }
 
-  private drawWords(words: FallingWord[], typedValue: string): void {
+  measureWordWidth(term: string): number {
+    this.ctx.font = WORD_FONT;
+    return this.ctx.measureText(term).width;
+  }
+
+  private drawWords(words: FallingWord[], typedValue: string, wrongHint: boolean, elapsedMs: number): void {
     const ctx = this.ctx;
+    const pulse = 0.5 + 0.5 * Math.sin(elapsedMs / 160);
     for (const word of words) {
       const lowerTerm = word.term.toLowerCase();
-      const matchLen = typedValue && lowerTerm.startsWith(typedValue) ? typedValue.length : 0;
+      const isCandidate = !typedValue || lowerTerm.startsWith(typedValue);
+      const matchLen = typedValue && isCandidate ? typedValue.length : 0;
+      const hintLen = wrongHint && isCandidate && matchLen < word.term.length ? 1 : 0;
       const matched = word.term.slice(0, matchLen);
-      const rest = word.term.slice(matchLen);
+      const next = word.term.slice(matchLen, matchLen + hintLen);
+      const rest = word.term.slice(matchLen + hintLen);
 
-      ctx.font = '600 20px system-ui, -apple-system, sans-serif';
+      ctx.font = WORD_FONT;
       const textWidth = ctx.measureText(word.term).width;
       ctx.fillStyle = 'rgba(5, 7, 15, 0.55)';
       ctx.beginPath();
@@ -94,6 +107,20 @@ export class CanvasRenderer {
       ctx.fillStyle = '#4ade80';
       ctx.fillText(matched, x, word.y);
       x += ctx.measureText(matched).width;
+
+      if (next) {
+        // the key the child should press next: red, on a pulsing box, underlined
+        const nextWidth = Math.max(ctx.measureText(next).width, 8);
+        ctx.fillStyle = `rgba(248, 113, 113, ${0.18 + 0.22 * pulse})`;
+        ctx.beginPath();
+        ctx.roundRect(x - 2, word.y - 19, nextWidth + 4, 25, 4);
+        ctx.fill();
+        ctx.fillStyle = '#f87171';
+        ctx.fillRect(x - 1, word.y + 4, nextWidth + 2, 3);
+        ctx.fillText(next, x, word.y);
+        x += ctx.measureText(next).width;
+      }
+
       ctx.fillStyle = '#f8fafc';
       ctx.fillText(rest, x, word.y);
     }
@@ -125,8 +152,22 @@ export class CanvasRenderer {
   private drawParticles(particles: Particle[]): void {
     const ctx = this.ctx;
     for (const p of particles) {
-      ctx.globalAlpha = Math.max(0, p.life / p.maxLife);
       ctx.fillStyle = p.color;
+      if (p.kind === 'confetti') {
+        // stays solid, fades over the last 30% of its life
+        ctx.globalAlpha = Math.min(1, Math.max(0, p.life / (p.maxLife * 0.3)));
+        const w = p.w ?? 4;
+        const h = p.h ?? 8;
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rot ?? 0);
+        // squash on one axis so the paper looks like it flips as it spins
+        ctx.scale(1, Math.cos((p.rot ?? 0) * 1.7));
+        ctx.fillRect(-w / 2, -h / 2, w, h);
+        ctx.restore();
+        continue;
+      }
+      ctx.globalAlpha = Math.max(0, p.life / p.maxLife);
       ctx.beginPath();
       ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
       ctx.fill();

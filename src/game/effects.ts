@@ -36,6 +36,13 @@ export interface Particle {
   life: number;
   maxLife: number;
   color: string;
+  // paper confetti: a spinning rectangle that drifts down and sways
+  kind?: 'dot' | 'confetti';
+  w?: number;
+  h?: number;
+  rot?: number;
+  spin?: number;
+  sway?: number;
 }
 
 export function createProjectile(sx: number, sy: number, tx: number, ty: number): Projectile {
@@ -76,11 +83,48 @@ export function createBurst(x: number, y: number, count = 12): Particle[] {
   return particles;
 }
 
+const CONFETTI_COLORS = ['#f472b6', '#fde047', '#4ade80', '#38bdf8', '#a78bfa', '#fb923c'];
+const CONFETTI_LIFE = 1400;
+
+export function createConfetti(x: number, y: number, count = 18): Particle[] {
+  const particles: Particle[] = [];
+  for (let i = 0; i < count; i++) {
+    particles.push({
+      kind: 'confetti',
+      x: x + (Math.random() - 0.5) * 24,
+      y,
+      vx: (Math.random() - 0.5) * 220,
+      vy: -70 - Math.random() * 110,
+      life: CONFETTI_LIFE - Math.random() * 300,
+      maxLife: CONFETTI_LIFE,
+      color: CONFETTI_COLORS[i % CONFETTI_COLORS.length],
+      w: 4 + Math.random() * 2,
+      h: 7 + Math.random() * 4,
+      rot: Math.random() * Math.PI,
+      spin: (Math.random() - 0.5) * 12,
+      sway: Math.random() * Math.PI * 2,
+    });
+  }
+  return particles;
+}
+
 export function advanceParticles(particles: Particle[], dt: number): Particle[] {
+  const s = dt / 1000;
   for (const p of particles) {
-    p.x += p.vx * (dt / 1000);
-    p.y += p.vy * (dt / 1000);
-    p.vy += 140 * (dt / 1000);
+    if (p.kind === 'confetti') {
+      // paper: light gravity, air drag, a little side-to-side flutter
+      const drag = Math.pow(0.35, s);
+      p.vx *= drag;
+      p.vy = p.vy * drag + 260 * s;
+      p.sway = (p.sway ?? 0) + 6 * s;
+      p.x += (p.vx + Math.sin(p.sway) * 30) * s;
+      p.y += p.vy * s;
+      p.rot = (p.rot ?? 0) + (p.spin ?? 0) * s;
+    } else {
+      p.x += p.vx * s;
+      p.y += p.vy * s;
+      p.vy += 140 * s;
+    }
     p.life -= dt;
   }
   return particles.filter((p) => p.life > 0);
