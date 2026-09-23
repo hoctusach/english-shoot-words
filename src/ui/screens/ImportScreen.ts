@@ -3,6 +3,7 @@ import { parseWordListFile } from '@/data/wordListImport';
 import { createWordSet, setLastSelectedSetId } from '@/data/wordSetStore';
 import type { WordSetWord } from '@/types/wordset';
 import { t } from '@/i18n';
+import { track } from '@/analytics';
 
 function baseName(fileName: string): string {
   return fileName.replace(/\.[^/.]+$/, '');
@@ -66,6 +67,7 @@ export function renderImportScreen(root: HTMLElement, app: App): void {
       const name = nameInput.value.trim() || baseName(fileName);
       const set = createWordSet(name, words, fileName);
       setLastSelectedSetId(set.id);
+      track('set_import', { words: words.length, type: fileName.toLowerCase().endsWith('.csv') ? 'csv' : 'xlsx' });
       app.showMenu();
     });
     actionsEl.appendChild(saveBtn);

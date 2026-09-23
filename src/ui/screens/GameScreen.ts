@@ -7,6 +7,7 @@ import { createMeaningToast } from '@/ui/components/MeaningToast';
 import { startViewportTracking, watchKeyboard } from '@/ui/viewport';
 import { formatSpeed } from '@/game/DifficultyCurve';
 import { t } from '@/i18n';
+import { track } from '@/analytics';
 
 export function renderGameScreen(root: HTMLElement, app: App, wordSet: WordSet): ScreenHandle | void {
   const wrap = document.createElement('div');
@@ -63,6 +64,21 @@ export function renderGameScreen(root: HTMLElement, app: App, wordSet: WordSet):
   canvas.className = 'game-canvas';
   canvasContainer.appendChild(canvas);
 
+  // anonymous round stats (no words or names): see src/analytics.ts
+  const roundStart = Date.now();
+  let roundSpeed = 0;
+  let roundScore = 0;
+  let roundWords = 0;
+  let roundEnded = false;
+  const roundStats = () => ({
+    set_size: wordSet.words.length,
+    speed: roundSpeed,
+    score: roundScore,
+    words_shot: roundWords,
+    minutes: Math.round((Date.now() - roundStart) / 6000) / 10,
+    touch: isTouch,
+  });
+
   let pausedForKeyboard = false;
   let hintTimer: number | undefined;
 
@@ -84,7 +100,11 @@ export function renderGameScreen(root: HTMLElement, app: App, wordSet: WordSet):
   };
 
   const engine = new GameEngine(canvas, canvasContainer, wordSet, {
-    onScoreChange: (state) => hud.update(state),
+    onScoreChange: (state) => {
+      hud.update(state);
+      roundScore = state.score;
+      roundWords = state.wordsKilled;
+    },
     onWordKilled: (word) => meaningToast.show(word.term, word.meaning, word.x, word.y),
     onPauseChange: (paused) => {
       pauseOverlay.classList.toggle('visible', paused);
@@ -95,6 +115,7 @@ export function renderGameScreen(root: HTMLElement, app: App, wordSet: WordSet):
       if (!paused) pausedForKeyboard = false;
     },
     onSpeedChange: (factor) => {
+      roundSpeed = factor;
       speedValue.textContent = formatSpeed(factor);
       speedValue.title = t('speedHint', factor);
     },
@@ -103,7 +124,11 @@ export function renderGameScreen(root: HTMLElement, app: App, wordSet: WordSet):
     },
     onSuggestionBlocked: () => showHint(t('typeEachLetter')),
     onVietnameseInput: () => showHint(t('vietnameseOn')),
-    onGameOver: (score, wordsKilled) => app.showGameOver(wordSet, score, wordsKilled),
+    onGameOver: (score, wordsKilled) => {
+      roundEnded = true;
+      track('game_over', { ...roundStats(), score, words_shot: wordsKilled });
+      app.showGameOver(wordSet, score, wordsKilled);
+    },
   });
 
   const stopKeyboardWatch = watchKeyboard((open) => {
@@ -125,9 +150,11 @@ export function renderGameScreen(root: HTMLElement, app: App, wordSet: WordSet):
   wrap.querySelector('.quit-btn')!.addEventListener('click', () => app.showMenu());
 
   engine.start();
+  track('game_start', { set_size: wordSet.words.length, speed: roundSpeed, touch: isTouch });
 
   return {
     destroy() {
+      if (!roundEnded) track('game_quit', roundStats());
       window.clearTimeout(hintTimer);
       stopKeyboardWatch();
       engine.destroy();

@@ -20,6 +20,28 @@ backend. Pick a saved set from "Saved word sets" to play it again instantly, or 
 "Continue: <set name>" shortcut on the home screen to jump back into the last one you
 played.
 
+## Install as an app, offline play and backups
+
+The site is a Progressive Web App: phones can add it to the home screen and desktop
+Chrome/Edge can install it as a window ("App & data" on Home shows how). After the first
+visit it also opens and plays offline (`public/sw.js`).
+
+"App & data" can download everything saved on the device (word sets, progress, stats,
+settings) as one `.json` file and restore it later — on the same device after clearing
+browser data, or on another device.
+
+## Usage stats (optional, free)
+
+`src/analytics.ts` can send anonymous counts to [Umami Cloud](https://cloud.umami.is)
+(free plan, no cookies, no server of our own): app opens, installs, imports (word
+count only), rounds started, finished or quit (speed, score, words shot, minutes).
+No player names or word lists are sent. It is off until a Website ID is set:
+
+1. Sign up at https://cloud.umami.is and add a website with domain
+   `hoctusach.github.io`.
+2. Copy its **Website ID** into `UMAMI_WEBSITE_ID` in `src/analytics.ts` and push.
+3. Visitors, devices, countries and the events above then show in the Umami dashboard.
+
 ## Development
 
 ```sh

@@ -5,10 +5,10 @@ export type Lang = 'vi' | 'en';
 export const LANGS: Lang[] = ['vi', 'en'];
 
 const en = {
-  appName: 'Word Shooter',
-  appNameLead: 'Word ',
-  appNameAccent: 'Shooter',
-  appNameTail: '',
+  appName: 'Game Bắn Từ',
+  appNameLead: 'Game ',
+  appNameAccent: 'Bắn',
+  appNameTail: ' Từ',
   tagline: 'Type the falling word to shoot it down — your own vocabulary, your own pace.',
   note: 'Switch your keyboard off Vietnamese input before playing. You can raise or lower the speed while playing. If the keyboard disappears, the game pauses — tap “⌨️ Open keyboard & play” to carry on.',
   player: 'Player',
@@ -26,7 +26,7 @@ const en = {
   words: '{0} words',
   best: '★ {0}',
   importTitle: 'Import word list',
-  importSub: '.csv or .xlsx — word, meaning',
+  importSub: '.csv or .xlsx · 2 columns: word, meaning — no header row needed',
   importHint:
     'Choose a .csv or .xlsx file with two columns: word, then meaning. No header row needed — every row is read as one word.',
   reading: 'Reading file...',
@@ -70,7 +70,20 @@ const en = {
   hardest: 'Most missed',
   noMistakes: 'Nothing left to review 🎉',
   storageWarning:
-    "⚠️ Don't clear this browser's cache / site data — all saved word sets, learning progress and settings would be lost.",
+    "⚠️ Don't clear this browser's cache / site data — all saved word sets, learning progress and settings would be lost. Download a backup file under “App & data” to be safe.",
+  appData: 'App & data',
+  installApp: 'Install app',
+  installBtn: '📲 Install',
+  installHint: 'Opens full screen like a real app, from your home screen or desktop — works offline too.',
+  installIos: 'On iPhone/iPad: tap the Share button ⎋ in Safari, then “Add to Home Screen”.',
+  installOther: 'Open the browser menu (⋮) and choose “Install app” or “Add to Home screen”.',
+  installedNote: '✅ Installed — you are playing in the app.',
+  backup: 'Backup',
+  backupHint: 'Saves your word sets, progress and settings as one file on this device. Use it to move to another device or after clearing browser data.',
+  backupBtn: '⬇ Download backup',
+  restoreBtn: '⬆ Restore from file',
+  restoreConfirm: 'Replace all current data with the {0} items in this backup?',
+  restoreError: 'This is not a Game Bắn Từ backup file.',
   mixHint: "Each round mixes 1 new word : 3 words you missed last time (most-missed first). A word you type right won't come back this round; if there aren't enough to review, new words fill in.",
 };
 
@@ -98,7 +111,7 @@ const vi: Record<Key, string> = {
   words: '{0} từ',
   best: '★ {0}',
   importTitle: 'Nhập danh sách từ',
-  importSub: '.csv hoặc .xlsx — từ, nghĩa',
+  importSub: '.csv hoặc .xlsx · 2 cột: từ, nghĩa — không cần tên cột',
   importHint:
     'Chọn tệp .csv hoặc .xlsx có 2 cột: từ, rồi nghĩa. Không cần dòng tiêu đề — mỗi dòng được đọc là một từ.',
   reading: 'Đang đọc tệp...',
@@ -142,7 +155,20 @@ const vi: Record<Key, string> = {
   hardest: 'Từ hay sai nhất',
   noMistakes: 'Không còn từ nào cần ôn 🎉',
   storageWarning:
-    '⚠️ Đừng xoá bộ nhớ đệm (cache) / dữ liệu trang web trên máy — mọi bộ từ, tiến độ học và cài đặt đã lưu sẽ bị mất.',
+    '⚠️ Đừng xoá bộ nhớ đệm (cache) / dữ liệu trang web trên máy — mọi bộ từ, tiến độ học và cài đặt đã lưu sẽ bị mất. Để chắc ăn, hãy tải file sao lưu ở mục “Ứng dụng & dữ liệu”.',
+  appData: 'Ứng dụng & dữ liệu',
+  installApp: 'Cài vào máy',
+  installBtn: '📲 Cài đặt',
+  installHint: 'Mở toàn màn hình như app thật, ngay từ màn hình chính hoặc máy tính — chơi được cả khi không có mạng.',
+  installIos: 'Trên iPhone/iPad: bấm nút Chia sẻ ⎋ trong Safari, rồi chọn “Thêm vào MH chính”.',
+  installOther: 'Mở menu trình duyệt (⋮) rồi chọn “Cài đặt ứng dụng” hoặc “Thêm vào màn hình chính”.',
+  installedNote: '✅ Đã cài — bạn đang chơi trong app.',
+  backup: 'Sao lưu',
+  backupHint: 'Lưu bộ từ, tiến độ học và cài đặt thành 1 file trên máy. Dùng khi đổi máy hoặc sau khi lỡ xoá dữ liệu trình duyệt.',
+  backupBtn: '⬇ Tải file sao lưu',
+  restoreBtn: '⬆ Khôi phục từ file',
+  restoreConfirm: 'Thay toàn bộ dữ liệu hiện tại bằng {0} mục trong file sao lưu này?',
+  restoreError: 'Đây không phải file sao lưu của Game Bắn Từ.',
   mixHint: 'Mỗi lượt trộn 1 từ mới : 3 từ lần gần nhất bạn gõ sai (sai nhiều ra trước). Từ đã gõ đúng trong ván sẽ không lặp lại; thiếu từ ôn thì lấy thêm từ mới.',
 };
 

@@ -1,0 +1,17 @@
+{
+  "name": "Game Bắn Từ",
+  "short_name": "Bắn Từ",
+  "description": "Gõ đúng từ đang rơi để bắn hạ nó — luyện từ vựng tiếng Anh với bộ từ của bạn.",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#05070f",
+  "theme_color": "#05070f",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

@@ -560,7 +560,7 @@ body::before {
   border-color: rgba(74, 222, 128, 0.5);
 }
 
-.import-card span {
+.import-card .import-text {
   display: flex;
   flex-direction: column;
   font-size: 14px;
@@ -583,6 +583,48 @@ body::before {
   background: rgba(74, 222, 128, 0.14);
   color: var(--accent);
   font-size: 20px;
+  flex-shrink: 0;
+}
+
+.data-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.data-row-stack {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+}
+
+.data-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
+}
+
+.data-text strong {
+  font-size: 14px;
+}
+
+.data-text span,
+.data-note {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.data-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.data-row .btn {
   flex-shrink: 0;
 }
 

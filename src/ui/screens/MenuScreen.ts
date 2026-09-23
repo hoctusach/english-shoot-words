@@ -17,6 +17,9 @@ import { formatSpeed } from '@/game/DifficultyCurve';
 import { t, getLang, setLang, LANGS, type Lang } from '@/i18n';
 import { loadProgress, summarizeProgress } from '@/data/progressStore';
 import { escapeHtml } from '@/utils/dom';
+import { canPromptInstall, isIos, isStandalone, onInstallAvailabilityChange, promptInstall } from '@/pwa';
+import { downloadBackup, readBackup, restoreBackup } from '@/data/backup';
+import { track } from '@/analytics';
 
 export function renderMenuScreen(root: HTMLElement, app: App): ScreenHandle {
   const wrap = document.createElement('div');
@@ -36,6 +39,9 @@ export function renderMenuScreen(root: HTMLElement, app: App): ScreenHandle {
   const settings = renderSettings();
   wrap.appendChild(settings.el);
 
+  const appData = renderAppData();
+  wrap.appendChild(appData.el);
+
   const storageNote = document.createElement('p');
   storageNote.className = 'home-storage-note';
   storageNote.textContent = t('storageWarning');
@@ -51,7 +57,12 @@ export function renderMenuScreen(root: HTMLElement, app: App): ScreenHandle {
   build.textContent = `build ${__BUILD_ID__}`;
   wrap.appendChild(build);
 
-  return { destroy: settings.destroy };
+  return {
+    destroy() {
+      settings.destroy();
+      appData.destroy();
+    },
+  };
 }
 
 function renderHero(app: App): HTMLElement {
@@ -171,7 +182,11 @@ function renderSets(section: HTMLElement, app: App): void {
 
   const importCard = document.createElement('button');
   importCard.className = 'import-card';
-  importCard.innerHTML = `<span class="import-plus">+</span><span>${t('importTitle')}<small>${t('importSub')}</small></span>`;
+  importCard.innerHTML = `
+    <span class="import-plus" aria-hidden="true">
+      <svg viewBox="0 0 20 20" width="18" height="18"><path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+    </span>
+    <span class="import-text">${t('importTitle')}<small>${t('importSub')}</small></span>`;
   importCard.addEventListener('click', () => app.showImport());
   section.appendChild(importCard);
 }
@@ -363,4 +378,74 @@ function renderSettings(): { el: HTMLElement; destroy: () => void } {
   body.appendChild(voiceRow);
 
   return { el: section, destroy: stopVoiceWatch };
+}
+
+// Install as an app, and back up / restore everything saved on this device.
+function renderAppData(): { el: HTMLElement; destroy: () => void } {
+  const section = document.createElement('section');
+  section.className = 'settings-section app-data-section';
+  section.innerHTML = `<div class="section-head"><h2>${t('appData')}</h2></div>`;
+
+  const body = document.createElement('div');
+  body.className = 'settings-block';
+  section.appendChild(body);
+
+  // install
+  const installRow = document.createElement('div');
+  installRow.className = 'data-row';
+  body.appendChild(installRow);
+  const drawInstall = () => {
+    if (isStandalone()) {
+      installRow.innerHTML = `<p class="data-note">${t('installedNote')}</p>`;
+      return;
+    }
+    const tip = canPromptInstall() ? t('installHint') : isIos() ? t('installIos') : t('installOther');
+    installRow.innerHTML = `
+      <div class="data-text"><strong>${t('installApp')}</strong><span>${tip}</span></div>
+      ${canPromptInstall() ? `<button class="btn btn-primary btn-sm install-btn" type="button">${t('installBtn')}</button>` : ''}`;
+    installRow.querySelector('.install-btn')?.addEventListener('click', async () => {
+      const accepted = await promptInstall();
+      track('install_prompt', { accepted });
+      drawInstall();
+    });
+  };
+  drawInstall();
+  const stopInstallWatch = onInstallAvailabilityChange(drawInstall);
+
+  // backup / restore
+  const backupRow = document.createElement('div');
+  backupRow.className = 'data-row data-row-stack';
+  backupRow.innerHTML = `
+    <div class="data-text"><strong>${t('backup')}</strong><span>${t('backupHint')}</span></div>
+    <div class="data-actions">
+      <button class="btn btn-sm backup-btn" type="button">${t('backupBtn')}</button>
+      <button class="btn btn-sm restore-btn" type="button">${t('restoreBtn')}</button>
+      <input class="restore-input" type="file" accept=".json,application/json" hidden>
+    </div>`;
+  body.appendChild(backupRow);
+
+  const restoreInput = backupRow.querySelector<HTMLInputElement>('.restore-input')!;
+  backupRow.querySelector('.backup-btn')!.addEventListener('click', () => {
+    downloadBackup();
+    track('backup_download');
+  });
+  backupRow.querySelector('.restore-btn')!.addEventListener('click', () => restoreInput.click());
+  restoreInput.addEventListener('change', async () => {
+    const file = restoreInput.files?.[0];
+    restoreInput.value = '';
+    if (!file) return;
+    let data: Record<string, string>;
+    try {
+      data = readBackup(await file.text());
+    } catch {
+      alert(t('restoreError'));
+      return;
+    }
+    if (!confirm(t('restoreConfirm', Object.keys(data).length))) return;
+    restoreBackup(data);
+    track('backup_restore');
+    location.reload();
+  });
+
+  return { el: section, destroy: stopInstallWatch };
 }
