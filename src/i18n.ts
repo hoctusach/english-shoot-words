@@ -5,6 +5,10 @@ export type Lang = 'vi' | 'en';
 export const LANGS: Lang[] = ['vi', 'en'];
 
 const en = {
+  appName: 'Word Shooter',
+  appNameLead: 'Word ',
+  appNameAccent: 'Shooter',
+  appNameTail: '',
   tagline: 'Type the falling word to shoot it down — your own vocabulary, your own pace.',
   note: 'Switch your keyboard off Vietnamese input before playing. You can raise or lower the speed while playing.',
   player: 'Player',
@@ -67,6 +71,10 @@ const en = {
 type Key = keyof typeof en;
 
 const vi: Record<Key, string> = {
+  appName: 'Game Bắn Từ',
+  appNameLead: 'Game ',
+  appNameAccent: 'Bắn',
+  appNameTail: ' Từ',
   tagline: 'Gõ đúng từ đang rơi để bắn hạ nó — bộ từ của bạn, tốc độ của bạn.',
   note: 'Nhớ tắt bộ gõ tiếng Việt trước khi chơi. Bạn có thể tăng/giảm tốc độ ngay trong lúc chơi.',
   player: 'Người chơi',
@@ -137,6 +145,7 @@ export function getLang(): Lang {
 export function setLang(lang: Lang): void {
   if (typeof localStorage !== 'undefined') localStorage.setItem(LANG_KEY, lang);
   document.documentElement.lang = lang;
+  document.title = strings[lang].appName;
 }
 
 export function t(key: Key, ...params: (string | number)[]): string {

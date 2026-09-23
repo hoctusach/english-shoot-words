@@ -1,4 +1,4 @@
-# English Shoot Words
+# Word Shooter (Game Bắn Từ)
 
 A small arcade-style typing game for practicing English vocabulary. Words drift down the
 screen with their Vietnamese meaning shown as a hint — type the word to "shoot" it down

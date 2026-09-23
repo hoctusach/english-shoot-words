@@ -58,7 +58,7 @@ function renderHero(app: App): HTMLElement {
         <circle cx="16" cy="16" r="3.5" fill="currentColor"/>
       </svg>
     </div>
-    <h1>English <span>Shoot</span> Words</h1>
+    <h1>${t('appNameLead')}<span>${t('appNameAccent')}</span>${t('appNameTail')}</h1>
     <p>${t('tagline')}</p>
   `;
 
@@ -177,6 +177,7 @@ function renderSetCard(set: WordSet, app: App, refresh: () => void): HTMLElement
     set.bestScore !== undefined ? t('best', set.bestScore.toLocaleString()) : null,
   ]
     .filter(Boolean)
+    .map((part) => `<span>${part}</span>`)
     .join(' · ');
 
   card.innerHTML = `

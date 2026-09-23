@@ -305,10 +305,13 @@ body::before {
 
 .set-card-foot p {
   margin: 0;
+  min-width: 0;
   font-size: 12px;
+  line-height: 1.45;
   color: var(--muted);
-  overflow: hidden;
-  text-overflow: ellipsis;
+}
+
+.set-card-foot p span {
   white-space: nowrap;
 }
 
