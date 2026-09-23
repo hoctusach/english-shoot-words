@@ -850,6 +850,31 @@ body.game-active {
   line-height: 1.25;
 }
 
+.game-hint {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translate(-50%, -6px);
+  max-width: calc(100% - 32px);
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(17, 23, 41, 0.92);
+  border: 1px solid rgba(248, 113, 113, 0.6);
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s, transform 0.2s;
+  z-index: 3;
+}
+
+.game-hint.visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
 .pause-overlay {
   position: absolute;
   inset: 0;

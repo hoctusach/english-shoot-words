@@ -1,17 +1,31 @@
+// Input types that put a whole word in at once: a keyboard suggestion or
+// autocorrect, a paste, a drop.
+const BULK_INPUT_TYPES = new Set([
+  'insertReplacementText',
+  'insertFromPaste',
+  'insertFromPasteAsQuotation',
+  'insertFromDrop',
+  'insertFromYank',
+]);
+
 export class InputController {
   readonly el: HTMLInputElement;
   private refocusing = false;
+  // the value after the last accepted input, restored when a bulk insert is refused
+  private lastValue = '';
 
   constructor(
     private container: HTMLElement,
     private onInputChange: (value: string) => void,
     private onFocusChange?: (focused: boolean) => void,
+    private onBlockedInsert?: () => void,
   ) {
     this.el = document.createElement('input');
     this.el.type = 'text';
     this.el.autocomplete = 'off';
     this.el.autocapitalize = 'off';
     this.el.spellcheck = false;
+    this.el.setAttribute('autocorrect', 'off');
     this.el.setAttribute('inputmode', 'text');
     this.el.className = 'typing-input';
     this.el.addEventListener('input', this.handleInput);
@@ -24,8 +38,19 @@ export class InputController {
     container.addEventListener('click', this.refocus);
   }
 
-  private handleInput = (): void => {
-    this.onInputChange(this.el.value);
+  // Typing adds one character per input event. Tapping a word in the mobile
+  // keyboard's suggestion strip adds the rest of the word in one go, which would
+  // skip the typing practice, so it is undone.
+  private handleInput = (e: Event): void => {
+    const value = this.el.value;
+    const inputType = (e as InputEvent).inputType ?? '';
+    if (value.length - this.lastValue.length > 1 || BULK_INPUT_TYPES.has(inputType)) {
+      this.el.value = this.lastValue;
+      this.onBlockedInsert?.();
+      return;
+    }
+    this.lastValue = value;
+    this.onInputChange(value);
   };
 
   private handleFocus = (): void => {
@@ -60,11 +85,12 @@ export class InputController {
   }
 
   clear(): void {
-    this.el.value = '';
+    this.setValue('');
   }
 
   setValue(value: string): void {
     this.el.value = value;
+    this.lastValue = value;
   }
 
   get value(): string {

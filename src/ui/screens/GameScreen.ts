@@ -34,6 +34,7 @@ export function renderGameScreen(root: HTMLElement, app: App, wordSet: WordSet):
       <button class="icon-btn pause-btn" aria-label="${t('pause')}">⏸</button>
     </div>
     <div class="canvas-container">
+      <div class="game-hint" role="status">${t('typeEachLetter')}</div>
       <div class="pause-overlay">
         <div class="pause-card">
           <p class="pause-title">${t('paused')}</p>
@@ -55,6 +56,7 @@ export function renderGameScreen(root: HTMLElement, app: App, wordSet: WordSet):
   const resumeBtn = wrap.querySelector<HTMLButtonElement>('.resume-btn')!;
   const pauseBtn = wrap.querySelector<HTMLButtonElement>('.pause-btn')!;
   const speedValue = wrap.querySelector<HTMLSpanElement>('.speed-value')!;
+  const gameHint = wrap.querySelector<HTMLDivElement>('.game-hint')!;
   const hud = createHUD(wrap.querySelector<HTMLDivElement>('.hud-slot')!);
   const meaningToast = createMeaningToast(canvasContainer);
   const canvas = document.createElement('canvas');
@@ -62,6 +64,13 @@ export function renderGameScreen(root: HTMLElement, app: App, wordSet: WordSet):
   canvasContainer.appendChild(canvas);
 
   let pausedForKeyboard = false;
+  let hintTimer: number | undefined;
+
+  const showHint = () => {
+    gameHint.classList.add('visible');
+    window.clearTimeout(hintTimer);
+    hintTimer = window.setTimeout(() => gameHint.classList.remove('visible'), 2200);
+  };
 
   // The keyboard disappearing mid-round (hide key, back key, a stray tap) would
   // otherwise let words keep falling while a child looks for a way to get it back.
@@ -91,6 +100,7 @@ export function renderGameScreen(root: HTMLElement, app: App, wordSet: WordSet):
     onInputFocusChange: (focused) => {
       if (!focused) onKeyboardLost();
     },
+    onSuggestionBlocked: showHint,
     onGameOver: (score, wordsKilled) => app.showGameOver(wordSet, score, wordsKilled),
   });
 
@@ -116,6 +126,7 @@ export function renderGameScreen(root: HTMLElement, app: App, wordSet: WordSet):
 
   return {
     destroy() {
+      window.clearTimeout(hintTimer);
       stopKeyboardWatch();
       engine.destroy();
       hud.destroy();

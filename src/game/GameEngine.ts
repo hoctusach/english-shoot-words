@@ -39,6 +39,7 @@ export interface GameEngineEvents {
   onPauseChange?: (paused: boolean) => void;
   onSpeedChange?: (factor: number) => void;
   onInputFocusChange?: (focused: boolean) => void;
+  onSuggestionBlocked?: () => void;
   onGameOver?: (finalScore: number, wordsKilled: number) => void;
 }
 
@@ -83,6 +84,10 @@ export class GameEngine {
       container,
       (value) => this.handleInput(value),
       (focused) => this.events.onInputFocusChange?.(focused),
+      () => {
+        this.flashInvalid();
+        this.events.onSuggestionBlocked?.();
+      },
     );
   }
 
@@ -280,6 +285,10 @@ export class GameEngine {
 
     // wrong letter: reject it instead of letting it stick and block every later word
     this.input.setValue(this.validValue);
+    this.flashInvalid();
+  }
+
+  private flashInvalid(): void {
     this.canvas.classList.add('flash-invalid');
     window.setTimeout(() => this.canvas.classList.remove('flash-invalid'), 200);
   }
