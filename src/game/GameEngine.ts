@@ -43,13 +43,19 @@ export interface GameEngineEvents {
   onInputFocusChange?: (focused: boolean) => void;
   onSuggestionBlocked?: () => void;
   onVietnameseInput?: () => void;
+  // a word reached the danger line (the screen shakes for SHAKE_MS)
+  onImpact?: () => void;
   onGameOver?: (finalScore: number, wordsKilled: number) => void;
 }
 
 const SIDE_MARGIN = 16;
 const NON_ASCII = /[^\x00-\x7f]/;
-const SHAKE_MS = 380;
+export const SHAKE_MS = 380;
+// small screens need a bigger jolt to read as a shake
 const SHAKE_PX = 9;
+const SHAKE_PX_SMALL_SCREEN = 12;
+const SMALL_SCREEN_PX = 600;
+const VIBRATE_PATTERN = [90, 40, 90];
 // how far above the danger line a word starts to make the line glow harder
 const DANGER_ZONE_PX = 120;
 const EMPTY_SCREEN_SPAWN_MS = 700;
@@ -189,7 +195,8 @@ export class GameEngine {
     this.update(time, dt);
     if (!this.running) return;
     const shakeLeft = Math.max(0, this.shakeUntil - time) / SHAKE_MS;
-    const amplitude = SHAKE_PX * shakeLeft * shakeLeft;
+    const shakePx = this.renderer.widthCss < SMALL_SCREEN_PX ? SHAKE_PX_SMALL_SCREEN : SHAKE_PX;
+    const amplitude = shakePx * shakeLeft * shakeLeft;
     this.shakeOffset = shakeLeft
       ? { x: (Math.random() * 2 - 1) * amplitude, y: (Math.random() * 2 - 1) * amplitude }
       : { x: 0, y: 0 };
@@ -261,8 +268,10 @@ export class GameEngine {
   private impact(time: number): void {
     this.shakeUntil = time + SHAKE_MS;
     playMiss();
+    this.events.onImpact?.();
     try {
-      navigator.vibrate?.(60);
+      // Android only: iPhone browsers don't let web pages vibrate
+      navigator.vibrate?.(VIBRATE_PATTERN);
     } catch {
       // vibration blocked or unsupported
     }

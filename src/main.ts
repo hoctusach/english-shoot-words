@@ -1,7 +1,7 @@
 import './style.css';
 import { App } from '@/App';
 import { getLang, setLang } from '@/i18n';
-import { checkForNewBuild } from '@/updateCheck';
+import { watchForNewBuilds } from '@/updateCheck';
 import { startPwa, isStandalone } from '@/pwa';
 import { initAnalytics, track } from '@/analytics';
 
@@ -16,4 +16,4 @@ startPwa(() => track('install'));
 const app = new App(root);
 app.start();
 
-void checkForNewBuild();
+watchForNewBuilds();

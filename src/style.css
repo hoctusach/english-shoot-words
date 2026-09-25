@@ -780,6 +780,20 @@ body.game-active {
   flex-shrink: 0;
 }
 
+.game-topbar.shake {
+  animation: topbar-shake 0.38s ease-out;
+}
+
+@keyframes topbar-shake {
+  0% { transform: translate(0, 0); }
+  12% { transform: translate(-6px, 3px); }
+  25% { transform: translate(6px, -3px); }
+  40% { transform: translate(-4px, 2px); }
+  55% { transform: translate(4px, -2px); }
+  75% { transform: translate(-2px, 1px); }
+  100% { transform: translate(0, 0); }
+}
+
 .hud-slot {
   flex: 1;
   min-width: 0;

@@ -1,7 +1,7 @@
 import type { App } from '@/App';
 import type { WordSet } from '@/types/wordset';
 import type { ScreenHandle } from '@/ui/ScreenManager';
-import { GameEngine } from '@/game/GameEngine';
+import { GameEngine, SHAKE_MS } from '@/game/GameEngine';
 import { createHUD } from '@/ui/components/HUD';
 import { createMeaningToast } from '@/ui/components/MeaningToast';
 import { startViewportTracking, watchKeyboard } from '@/ui/viewport';
@@ -58,6 +58,7 @@ export function renderGameScreen(root: HTMLElement, app: App, wordSet: WordSet):
   const pauseBtn = wrap.querySelector<HTMLButtonElement>('.pause-btn')!;
   const speedValue = wrap.querySelector<HTMLSpanElement>('.speed-value')!;
   const gameHint = wrap.querySelector<HTMLDivElement>('.game-hint')!;
+  const topbar = wrap.querySelector<HTMLDivElement>('.game-topbar')!;
   const hud = createHUD(wrap.querySelector<HTMLDivElement>('.hud-slot')!);
   const meaningToast = createMeaningToast(canvasContainer);
   const canvas = document.createElement('canvas');
@@ -81,6 +82,17 @@ export function renderGameScreen(root: HTMLElement, app: App, wordSet: WordSet):
 
   let pausedForKeyboard = false;
   let hintTimer: number | undefined;
+  let shakeTimer: number | undefined;
+
+  // The canvas shakes itself; the top bar joins in so the whole screen jolts. The
+  // hidden typing input lives in the canvas container, which is never moved.
+  const shakeTopbar = () => {
+    topbar.classList.remove('shake');
+    void topbar.offsetWidth;
+    topbar.classList.add('shake');
+    window.clearTimeout(shakeTimer);
+    shakeTimer = window.setTimeout(() => topbar.classList.remove('shake'), SHAKE_MS);
+  };
 
   const showHint = (text: string) => {
     gameHint.textContent = text;
@@ -124,6 +136,7 @@ export function renderGameScreen(root: HTMLElement, app: App, wordSet: WordSet):
     },
     onSuggestionBlocked: () => showHint(t('typeEachLetter')),
     onVietnameseInput: () => showHint(t('vietnameseOn')),
+    onImpact: shakeTopbar,
     onGameOver: (score, wordsKilled) => {
       roundEnded = true;
       track('game_over', { ...roundStats(), score, words_shot: wordsKilled });
@@ -156,6 +169,7 @@ export function renderGameScreen(root: HTMLElement, app: App, wordSet: WordSet):
     destroy() {
       if (!roundEnded) track('game_quit', roundStats());
       window.clearTimeout(hintTimer);
+      window.clearTimeout(shakeTimer);
       stopKeyboardWatch();
       engine.destroy();
       hud.destroy();
