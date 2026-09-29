@@ -628,6 +628,17 @@ body::before {
   flex-shrink: 0;
 }
 
+.voice-hint {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: #fcd34d;
+}
+
+.voice-hint[hidden] {
+  display: none;
+}
+
 .settings-section {
   display: flex;
   flex-direction: column;

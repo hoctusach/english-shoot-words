@@ -1,5 +1,5 @@
 import type { WordSet } from '@/types/wordset';
-import { speak } from '@/audio/pronounce';
+import { speak, prepareSpeech } from '@/audio/pronounce';
 import { playTick, playSuccess, playMiss } from '@/audio/sfx';
 import { getBackgroundThemeId } from '@/data/settingsStore';
 import { setWordSetSpeedFactor } from '@/data/wordSetStore';
@@ -321,6 +321,7 @@ export class GameEngine {
       x,
       y: -20,
     });
+    prepareSpeech(word.term);
   }
 
   private handleInput(rawValue: string): void {

@@ -11,7 +11,7 @@ import {
 import { getBackgroundThemeId, setBackgroundThemeId, getVoiceName, setVoiceName } from '@/data/settingsStore';
 import { BACKGROUND_THEMES } from '@/ui/backgrounds';
 import { getStats, setPlayerName } from '@/data/statsStore';
-import { getEnglishVoices, onVoicesReady, speak } from '@/audio/pronounce';
+import { getEnglishVoices, isInAppBrowser, onVoicesReady, speak, usesOnlineVoice } from '@/audio/pronounce';
 import { defaultSpeedForSet } from '@/game/difficultyScore';
 import { formatSpeed } from '@/game/DifficultyCurve';
 import { t, getLang, setLang, LANGS, type Lang } from '@/i18n';
@@ -347,14 +347,23 @@ function renderSettings(): { el: HTMLElement; destroy: () => void } {
   testBtn.className = 'icon-btn';
   testBtn.textContent = '▶';
   testBtn.setAttribute('aria-label', 'Test voice');
+  // shown when this device/browser has no English voice and words use recordings
+  const voiceHint = document.createElement('p');
+  voiceHint.className = 'voice-hint';
+  voiceHint.hidden = true;
 
   const fillVoices = () => {
     const voices = getEnglishVoices();
     const saved = getVoiceName();
     voiceSelect.innerHTML = '';
+    const online = usesOnlineVoice();
+    voiceHint.hidden = !online;
+    if (online) {
+      voiceHint.textContent = isInAppBrowser() ? `${t('voiceInApp')} ${t('voiceMissing')}` : t('voiceMissing');
+    }
     if (voices.length === 0) {
       const option = document.createElement('option');
-      option.textContent = t('deviceVoice');
+      option.textContent = online ? t('voiceOnline') : t('deviceVoice');
       option.value = '';
       voiceSelect.appendChild(option);
       return;
@@ -373,9 +382,14 @@ function renderSettings(): { el: HTMLElement; destroy: () => void } {
     setVoiceName(voiceSelect.value);
     speak('ready', voiceSelect.value);
   });
-  testBtn.addEventListener('click', () => speak('shoot the word', voiceSelect.value));
+  testBtn.addEventListener('click', () => {
+    speak('shoot the word', voiceSelect.value);
+    // a silent device voice is only discovered by trying it
+    window.setTimeout(fillVoices, 1500);
+  });
   voiceRow.append(voiceSelect, testBtn);
   body.appendChild(voiceRow);
+  body.appendChild(voiceHint);
 
   return { el: section, destroy: stopVoiceWatch };
 }

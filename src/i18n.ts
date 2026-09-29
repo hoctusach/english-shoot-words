@@ -40,6 +40,10 @@ const en = {
   background: 'Background',
   voice: 'Voice',
   deviceVoice: 'Device default',
+  voiceOnline: '🌐 Online dictionary voice',
+  voiceMissing:
+    'This device has no English voice, so words are read from an online dictionary (needs internet). For the full device voice: in Settings → Accessibility → Text-to-speech, choose “Speech Services by Google” and download an English voice.',
+  voiceInApp: 'You opened the game inside another app — open it in Chrome (⋮ → Open in Chrome) to use the device voice.',
   language: 'Language',
   quit: 'Quit',
   slower: 'Slower',
@@ -126,6 +130,10 @@ const vi: Record<Key, string> = {
   background: 'Hình nền',
   voice: 'Giọng đọc',
   deviceVoice: 'Mặc định của máy',
+  voiceOnline: '🌐 Giọng online (từ điển)',
+  voiceMissing:
+    'Máy/trình duyệt này không có giọng đọc tiếng Anh, nên game đọc từ bằng bản ghi âm của từ điển online (cần mạng). Muốn dùng giọng của máy: vào Cài đặt → Hỗ trợ tiếp cận → Chuyển văn bản thành giọng nói, chọn “Dịch vụ lời nói của Google” và tải giọng tiếng Anh.',
+  voiceInApp: 'Bạn đang mở game trong ứng dụng khác (Telegram, Zalo…) — hãy mở bằng Chrome (⋮ → Mở trong Chrome) để dùng giọng của máy.',
   language: 'Ngôn ngữ',
   quit: 'Thoát',
   slower: 'Chậm lại',
