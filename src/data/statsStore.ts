@@ -39,10 +39,11 @@ export function setPlayerName(name: string): void {
   saveStats(stats);
 }
 
-export function addRoundResult(score: number, wordsShot: number): PlayerStats {
+// Saved on every shot, so closing the app mid-round loses nothing.
+export function addKill(points: number): PlayerStats {
   const stats = getStats();
-  stats.totalScore += score;
-  stats.totalWordsShot += wordsShot;
+  stats.totalScore += points;
+  stats.totalWordsShot += 1;
   saveStats(stats);
   return stats;
 }

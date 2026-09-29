@@ -2,7 +2,8 @@ import { ScreenManager } from '@/ui/ScreenManager';
 import { renderMenuScreen } from '@/ui/screens/MenuScreen';
 import { renderImportScreen } from '@/ui/screens/ImportScreen';
 import { renderGameScreen } from '@/ui/screens/GameScreen';
-import { renderGameOverScreen } from '@/ui/screens/GameOverScreen';
+import { renderResultsScreen } from '@/ui/screens/ResultsScreen';
+import type { GameMode } from '@/game/GameMode';
 import type { WordSet } from '@/types/wordset';
 import {
   getLastPlayedSetId,
@@ -15,6 +16,10 @@ import { FIRST_PLAY_SET_ID } from '@/data/seedSets';
 export interface ShowGameOptions {
   // open the round paused behind a "start" button (the app just opened)
   waitForStart?: boolean;
+  // practice (default) or a challenge set up with its miss limit and speed
+  mode?: GameMode;
+  // who is playing (a challenge asks; practice uses the Home player name)
+  player?: string;
 }
 
 export class App {
@@ -54,7 +59,7 @@ export class App {
     this.screens.show((root) => renderGameScreen(root, this, wordSet, options));
   };
 
-  showGameOver = (wordSet: WordSet, score: number, wordsKilled: number): void => {
-    this.screens.show((root) => renderGameOverScreen(root, this, wordSet, score, wordsKilled));
+  showResults = (wordSet: WordSet, sessionId: string): void => {
+    this.screens.show((root) => renderResultsScreen(root, this, wordSet, sessionId));
   };
 }

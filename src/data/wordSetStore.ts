@@ -1,6 +1,7 @@
 import { WORD_SETS_KEY, LAST_SELECTED_SET_KEY, LAST_PLAYED_SET_KEY } from '@/utils/storageKeys';
 import type { WordSet, WordSetWord } from '@/types/wordset';
 import { deleteProgress } from '@/data/progressStore';
+import { deleteSessionsForSet } from '@/data/sessionStore';
 
 function hasLocalStorage(): boolean {
   return typeof localStorage !== 'undefined';
@@ -62,6 +63,7 @@ export function deleteWordSet(id: string): void {
   const sets = loadWordSets().filter((s) => s.id !== id);
   saveWordSets(sets);
   deleteProgress(id);
+  deleteSessionsForSet(id);
   if (getLastSelectedSetId() === id) {
     clearLastSelectedSetId();
   }

@@ -17,6 +17,9 @@ import { formatSpeed } from '@/game/DifficultyCurve';
 import { t, getLang, setLang, LANGS, type Lang } from '@/i18n';
 import { loadProgress, summarizeProgress } from '@/data/progressStore';
 import { escapeHtml } from '@/utils/dom';
+import { openChallengeSetup } from '@/ui/components/ChallengeSetup';
+import { sessionTable } from '@/ui/screens/ResultsScreen';
+import { challengeBoard, getChallengePrefs } from '@/data/sessionStore';
 import { canPromptInstall, isIos, isStandalone, onInstallAvailabilityChange, promptInstall } from '@/pwa';
 import { downloadBackup, readBackup, restoreBackup } from '@/data/backup';
 import { track } from '@/analytics';
@@ -213,13 +216,21 @@ function renderSetCard(set: WordSet, app: App, refresh: () => void): HTMLElement
   const actions = document.createElement('div');
   actions.className = 'set-card-actions';
 
-  const playBtn = document.createElement('button');
-  playBtn.className = 'play-btn';
-  playBtn.textContent = t('play');
-  playBtn.addEventListener('click', () => {
+  // two ways to play: endless practice, or a fair ranked challenge
+  const modes = document.createElement('div');
+  modes.className = 'set-card-modes';
+  const practiceBtn = document.createElement('button');
+  practiceBtn.className = 'play-btn practice-btn';
+  practiceBtn.textContent = t('practiceBtn');
+  practiceBtn.addEventListener('click', () => {
     setLastSelectedSetId(set.id);
     app.showGame(set);
   });
+  const challengeBtn = document.createElement('button');
+  challengeBtn.className = 'play-btn challenge-btn';
+  challengeBtn.textContent = t('challengeBtn');
+  challengeBtn.addEventListener('click', () => openChallengeSetup(app, set));
+  modes.append(practiceBtn, challengeBtn);
 
   const renameBtn = document.createElement('button');
   renameBtn.className = 'icon-btn';
@@ -246,10 +257,35 @@ function renderSetCard(set: WordSet, app: App, refresh: () => void): HTMLElement
     }
   });
 
-  actions.append(renameBtn, deleteBtn, playBtn);
+  actions.append(renameBtn, deleteBtn);
   card.querySelector('.set-card-foot')!.appendChild(actions);
+  card.appendChild(modes);
   card.appendChild(renderProgress(set));
+  card.appendChild(renderChallengeBoard(set));
   return card;
+}
+
+// Top attempts for the challenge settings last used on this set.
+function renderChallengeBoard(set: WordSet): HTMLElement {
+  const details = document.createElement('details');
+  details.className = 'set-progress set-challenges';
+  const prefs = getChallengePrefs(set.id);
+  const board = prefs ? challengeBoard(set.id, prefs.missLimit, prefs.speed) : [];
+  const leader = board[0];
+  details.innerHTML = `
+    <summary>
+      <span class="progress-title">🏆 ${t('challengeSection')}</span>
+      <span class="progress-mini">${leader ? `${escapeHtml(leader.player)} · ${leader.score.toLocaleString()}` : t('noChallenges')}</span>
+    </summary>
+    <div class="progress-body">
+      ${
+        prefs && board.length
+          ? `<p class="progress-sub">${t('boardTitle', prefs.missLimit, formatSpeed(prefs.speed))}</p>${sessionTable(board.slice(0, 5), null, true)}`
+          : `<p class="progress-empty">${t('noChallenges')}</p>`
+      }
+    </div>
+  `;
+  return details;
 }
 
 function renderProgress(set: WordSet): HTMLElement {

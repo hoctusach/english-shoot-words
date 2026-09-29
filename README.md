@@ -18,6 +18,24 @@ letters and typographic punctuation in words (exposé, didn’t) can be typed wi
 plain keyboard letters (expose, didn't). Each imported file is saved as a single word set that
 you can rename afterwards from "Saved word sets".
 
+## Practice and Challenge
+
+Each word set has two modes:
+
+- **Practice (Luyện tập)**: endless, no game over. Words are picked adaptively
+  (1 new : 3 to review) and the speed can be changed while playing. ⏹ finishes the
+  round and shows the results with the set's recent rounds.
+- **Challenge (Thử thách)**: made for comparing players, e.g. a teacher letting each
+  child play in turn. Before starting, enter the player's name, how many missed words
+  end the game (default 10) and the speed, which is then locked. Every attempt on the
+  set gets the same words in the same order (a fixed seeded shuffle), so scores are
+  comparable; attempts with the same miss limit and speed are ranked on a leaderboard
+  shown after each attempt and on the set's card.
+
+Every round is recorded in `localStorage` (`shootwords.sessions.v1`) and updated after
+each shot or miss, and lifetime totals are added per shot, so stopping or closing the
+app mid-round never loses the score.
+
 ## Built-in sets
 
 `src/data/seed/*.csv` files listed in `src/data/seedSets.ts` ship with the game (today:

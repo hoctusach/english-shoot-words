@@ -6,6 +6,8 @@ import { setWordSetSpeedFactor } from '@/data/wordSetStore';
 import { getThemeById } from '@/ui/backgrounds';
 import { PLATE_PADDING, type FallingWord } from './FallingWord';
 import { Spawner } from './Spawner';
+import { ChallengeSpawner } from './ChallengeSpawner';
+import { PRACTICE, seededRandom, type GameMode } from './GameMode';
 import { ProgressTracker } from './ProgressTracker';
 import { termKey } from '@/data/progressStore';
 import { CanvasRenderer } from './CanvasRenderer';
@@ -46,7 +48,8 @@ export interface GameEngineEvents {
   onVietnameseInput?: () => void;
   // a word reached the danger line (the screen shakes for SHAKE_MS)
   onImpact?: () => void;
-  onGameOver?: (finalScore: number, wordsKilled: number) => void;
+  // challenge only: the miss limit was reached
+  onGameOver?: (state: ScoreState) => void;
 }
 
 const SIDE_MARGIN = 16;
@@ -66,7 +69,9 @@ const MIN_WORD_SCALE = 0.6;
 export class GameEngine {
   private ctx: CanvasRenderingContext2D;
   private renderer: CanvasRenderer;
-  private spawner: Spawner;
+  private spawner: Spawner | ChallengeSpawner;
+  // spawn positions: seeded in a challenge so every attempt looks the same
+  private random: () => number;
   private progress: ProgressTracker;
   private input: InputController;
   private wordSetId: string;
@@ -92,6 +97,7 @@ export class GameEngine {
     container: HTMLElement,
     wordSet: WordSet,
     private events: GameEngineEvents,
+    private mode: GameMode = PRACTICE,
   ) {
     const ctx = canvas.getContext('2d');
     if (!ctx) throw new Error('Canvas 2D context unavailable');
@@ -106,9 +112,17 @@ export class GameEngine {
         this.activeWords.map((w) => ({ term: w.term, x: w.x, y: w.y, scale: w.scale, width: w.width, canvasWidth: this.renderer.widthCss }));
     }
     this.wordSetId = wordSet.id;
-    this.speedFactor = snapSpeedFactor(wordSet.speedFactor ?? defaultSpeedForSet(wordSet.words));
     this.progress = new ProgressTracker(wordSet.id);
-    this.spawner = new Spawner(wordSet.words, this.progress);
+    if (mode.kind === 'challenge') {
+      this.speedFactor = snapSpeedFactor(mode.speed);
+      this.spawner = new ChallengeSpawner(wordSet.words, mode.seed);
+      this.random = seededRandom(mode.seed ^ 0x9e3779b9);
+      this.scoreState = createScoreState(mode.missLimit);
+    } else {
+      this.speedFactor = snapSpeedFactor(wordSet.speedFactor ?? defaultSpeedForSet(wordSet.words));
+      this.spawner = new Spawner(wordSet.words, this.progress);
+      this.random = Math.random;
+    }
     this.input = new InputController(
       container,
       (value) => this.handleInput(value),
@@ -162,6 +176,8 @@ export class GameEngine {
   }
 
   adjustSpeed(direction: 1 | -1): void {
+    // a challenge runs at the speed it was set up with, the same for everyone
+    if (this.mode.kind === 'challenge') return;
     const next = stepSpeedFactor(this.speedFactor, direction);
     if (next === this.speedFactor) return;
     this.speedFactor = next;
@@ -349,7 +365,7 @@ export class GameEngine {
       term: word.term,
       meaning: word.meaning,
       example: word.example,
-      x: minX + Math.random() * (maxX - minX),
+      x: minX + this.random() * (maxX - minX),
       y: -20,
       scale,
       width,
@@ -440,10 +456,12 @@ export class GameEngine {
     this.events.onWordKilled?.(word);
   }
 
+  get state(): ScoreState {
+    return this.scoreState;
+  }
+
   private gameOver(): void {
-    const finalScore = this.scoreState.score;
-    const wordsKilled = this.scoreState.wordsKilled;
     this.destroy();
-    this.events.onGameOver?.(finalScore, wordsKilled);
+    this.events.onGameOver?.(this.scoreState);
   }
 }

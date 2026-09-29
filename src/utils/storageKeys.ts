@@ -7,3 +7,5 @@ export const LANG_KEY = 'shootwords.lang.v1';
 export const PROGRESS_KEY_PREFIX = 'shootwords.progress.v1.';
 export const SEEDED_SETS_KEY = 'shootwords.seededSets.v1';
 export const LAST_PLAYED_SET_KEY = 'shootwords.lastPlayedSetId.v1';
+export const SESSIONS_KEY = 'shootwords.sessions.v1';
+export const CHALLENGE_PREFS_KEY = 'shootwords.challengePrefs.v1';
