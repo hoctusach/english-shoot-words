@@ -16,6 +16,14 @@ automatically if present). CSV fields may be quoted, so meanings and examples ca
 commas. Each imported file is saved as a single word set that
 you can rename afterwards from "Saved word sets".
 
+## Built-in sets
+
+`src/data/seed/*.csv` files listed in `src/data/seedSets.ts` ship with the game (today:
+"Ways of Walking (C1)", 26 words with examples). Each device gets them once on its next
+visit, web or installed app; a player who deletes one doesn't get it back, and a set is
+skipped if the player already imported the same words. To add another, drop its CSV in
+`src/data/seed/` and add an entry with a new fixed `id`.
+
 ## Saved sets
 
 Word sets are saved to the browser's `localStorage` on your device — no account, no

@@ -103,6 +103,10 @@ export function parseCsv(text: string): string[][] {
   return rows;
 }
 
+export function wordsFromCsvText(text: string): WordSetWord[] {
+  return toWords(parseCsv(text));
+}
+
 async function parseXlsxFile(file: File): Promise<WordSetWord[]> {
   const XLSX = await import('xlsx');
   const buffer = await file.arrayBuffer();
@@ -123,8 +127,7 @@ async function parseXlsxFile(file: File): Promise<WordSetWord[]> {
 export async function parseWordListFile(file: File): Promise<WordSetWord[]> {
   const name = file.name.toLowerCase();
   if (name.endsWith('.csv')) {
-    const text = await file.text();
-    return toWords(parseCsv(text));
+    return wordsFromCsvText(await file.text());
   }
   if (name.endsWith('.xlsx') || name.endsWith('.xls')) {
     return parseXlsxFile(file);

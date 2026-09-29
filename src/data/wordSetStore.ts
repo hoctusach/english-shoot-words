@@ -41,6 +41,15 @@ export function createWordSet(name: string, words: WordSetWord[], sourceFileName
   return set;
 }
 
+// Adds a set with a fixed id (the built-in sets); no-op if that id already exists.
+export function addWordSetWithId(set: WordSet): boolean {
+  const sets = loadWordSets();
+  if (sets.some((s) => s.id === set.id)) return false;
+  sets.push(set);
+  saveWordSets(sets);
+  return true;
+}
+
 export function renameWordSet(id: string, newName: string): void {
   const sets = loadWordSets();
   const set = sets.find((s) => s.id === id);
