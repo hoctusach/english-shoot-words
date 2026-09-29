@@ -1,4 +1,4 @@
-import type { FallingWord } from './FallingWord';
+import { PLATE_PADDING, type FallingWord } from './FallingWord';
 import type { BackgroundTheme } from '@/ui/backgrounds';
 import {
   type Projectile,
@@ -158,6 +158,10 @@ export class CanvasRenderer {
       const rest = word.term.slice(matchLen + hintLen);
 
       const isTarget = word.id === targetId;
+      // drawn at the word's own size (long phrases are shrunk to fit the screen)
+      ctx.save();
+      ctx.translate(word.x, word.y);
+      ctx.scale(word.scale, word.scale);
       ctx.font = WORD_FONT;
       const textWidth = ctx.measureText(word.term).width;
       ctx.save();
@@ -166,7 +170,7 @@ export class CanvasRenderer {
       ctx.shadowOffsetY = 3;
       ctx.fillStyle = 'rgba(5, 7, 15, 0.6)';
       ctx.beginPath();
-      ctx.roundRect(word.x - 6, word.y - 20, textWidth + 12, 28, 6);
+      ctx.roundRect(-PLATE_PADDING, -20, textWidth + PLATE_PADDING * 2, 28, 6);
       ctx.fill();
       ctx.restore();
       if (isTarget) {
@@ -177,14 +181,14 @@ export class CanvasRenderer {
         ctx.strokeStyle = TARGET_COLOR;
         ctx.lineWidth = 1.5;
         ctx.beginPath();
-        ctx.roundRect(word.x - 6, word.y - 20, textWidth + 12, 28, 6);
+        ctx.roundRect(-PLATE_PADDING, -20, textWidth + PLATE_PADDING * 2, 28, 6);
         ctx.stroke();
         ctx.restore();
       }
 
-      let x = word.x;
+      let x = 0;
       ctx.fillStyle = '#4ade80';
-      ctx.fillText(matched, x, word.y);
+      ctx.fillText(matched, x, 0);
       x += ctx.measureText(matched).width;
 
       if (next) {
@@ -192,16 +196,17 @@ export class CanvasRenderer {
         const nextWidth = Math.max(ctx.measureText(next).width, 8);
         ctx.fillStyle = `rgba(248, 113, 113, ${0.18 + 0.22 * pulse})`;
         ctx.beginPath();
-        ctx.roundRect(x - 2, word.y - 19, nextWidth + 4, 25, 4);
+        ctx.roundRect(x - 2, -19, nextWidth + 4, 25, 4);
         ctx.fill();
         ctx.fillStyle = '#f87171';
-        ctx.fillRect(x - 1, word.y + 4, nextWidth + 2, 3);
-        ctx.fillText(next, x, word.y);
+        ctx.fillRect(x - 1, 4, nextWidth + 2, 3);
+        ctx.fillText(next, x, 0);
         x += ctx.measureText(next).width;
       }
 
       ctx.fillStyle = isTarget ? TARGET_COLOR : '#f8fafc';
-      ctx.fillText(rest, x, word.y);
+      ctx.fillText(rest, x, 0);
+      ctx.restore();
     }
   }
 

@@ -4,7 +4,7 @@ import { playTick, playSuccess, playMiss } from '@/audio/sfx';
 import { getBackgroundThemeId } from '@/data/settingsStore';
 import { setWordSetSpeedFactor } from '@/data/wordSetStore';
 import { getThemeById } from '@/ui/backgrounds';
-import type { FallingWord } from './FallingWord';
+import { PLATE_PADDING, type FallingWord } from './FallingWord';
 import { Spawner } from './Spawner';
 import { ProgressTracker } from './ProgressTracker';
 import { termKey } from '@/data/progressStore';
@@ -60,7 +60,8 @@ const VIBRATE_PATTERN = [90, 40, 90];
 // how far above the danger line a word starts to make the line glow harder
 const DANGER_ZONE_PX = 120;
 const EMPTY_SCREEN_SPAWN_MS = 700;
-const WORD_SLOT_WIDTH = 160;
+// smallest size a long phrase is shrunk to (12px text)
+const MIN_WORD_SCALE = 0.6;
 
 export class GameEngine {
   private ctx: CanvasRenderingContext2D;
@@ -99,6 +100,11 @@ export class GameEngine {
     this.renderer.afterResize = () => {
       if (this.running && this.paused) this.draw(performance.now());
     };
+    // ?debug in the URL: let automated checks read where the words are
+    if (new URLSearchParams(location.search).has('debug')) {
+      (window as unknown as { __shootWords: () => unknown }).__shootWords = () =>
+        this.activeWords.map((w) => ({ term: w.term, x: w.x, y: w.y, scale: w.scale, width: w.width, canvasWidth: this.renderer.widthCss }));
+    }
     this.wordSetId = wordSet.id;
     this.speedFactor = snapSpeedFactor(wordSet.speedFactor ?? defaultSpeedForSet(wordSet.words));
     this.progress = new ProgressTracker(wordSet.id);
@@ -245,8 +251,12 @@ export class GameEngine {
 
     const fallSpeed = fallSpeedPxPerSec(this.scoreState.level, this.speedFactor);
     const heightCss = this.renderer.heightCss;
+    const widthCss = this.renderer.widthCss;
     for (const word of this.activeWords) {
       word.y += fallSpeed * (dt / 1000);
+      // keep it inside if the play area got narrower mid-fall (rotation, resize)
+      const maxX = widthCss - SIDE_MARGIN - word.width + PLATE_PADDING * word.scale;
+      if (word.x > maxX) word.x = Math.max(SIDE_MARGIN + PLATE_PADDING * word.scale, maxX);
     }
 
     this.projectiles = advanceProjectiles(this.projectiles, dt);
@@ -259,7 +269,7 @@ export class GameEngine {
       for (const word of missed) {
         this.progress.recordMiss(word.term);
         this.scoreState = applyMiss(this.scoreState);
-        const center = word.x + this.renderer.measureWordWidth(word.term) / 2;
+        const center = word.x - PLATE_PADDING * word.scale + word.width / 2;
         this.particles.push(...createImpactBurst(center, heightCss - bottomMargin(heightCss)));
       }
       this.impact(time);
@@ -325,16 +335,24 @@ export class GameEngine {
     const activeTerms = new Set(this.activeWords.map((w) => termKey(w.term)));
     const word = this.spawner.next(activeTerms);
     if (!word) return;
+    // Fit the whole word on screen: shrink a phrase wider than the play area, then
+    // place it anywhere its plate stays inside the side margins.
     const widthCss = this.renderer.widthCss;
-    const maxX = Math.max(SIDE_MARGIN, widthCss - SIDE_MARGIN - WORD_SLOT_WIDTH);
-    const x = SIDE_MARGIN + Math.random() * maxX;
+    const fullWidth = this.renderer.measureWordWidth(word.term) + PLATE_PADDING * 2;
+    const usable = Math.max(1, widthCss - SIDE_MARGIN * 2);
+    const scale = fullWidth > usable ? Math.max(MIN_WORD_SCALE, usable / fullWidth) : 1;
+    const width = fullWidth * scale;
+    const minX = SIDE_MARGIN + PLATE_PADDING * scale;
+    const maxX = Math.max(minX, widthCss - SIDE_MARGIN - width + PLATE_PADDING * scale);
     this.activeWords.push({
       id: crypto.randomUUID(),
       term: word.term,
       meaning: word.meaning,
       example: word.example,
-      x,
+      x: minX + Math.random() * (maxX - minX),
       y: -20,
+      scale,
+      width,
     });
     prepareSpeech(word.term);
   }
@@ -411,7 +429,7 @@ export class GameEngine {
   private killWord(word: FallingWord): void {
     this.fireAt(word);
     this.particles.push(...createBurst(word.x, word.y));
-    this.particles.push(...createConfetti(word.x + this.renderer.measureWordWidth(word.term) / 2, word.y - 8));
+    this.particles.push(...createConfetti(word.x - PLATE_PADDING * word.scale + word.width / 2, word.y - 8));
     this.activeWords = this.activeWords.filter((w) => w.id !== word.id);
     this.progress.recordCorrect(word.term);
     this.resetInput();
