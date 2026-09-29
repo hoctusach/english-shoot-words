@@ -21,8 +21,8 @@ you can rename afterwards from "Saved word sets".
 ## Built-in sets
 
 `src/data/seed/*.csv` files listed in `src/data/seedSets.ts` ship with the game (today:
-"Movers A1", 740 words; "Ways of Walking (C1)", 26 words with examples; and "Nâng cao
-B2–C1", 2477 idioms, phrasal verbs and word families). Each list is its own small file,
+"Movers A1", 740 words; "Ways of Walking (C1)", 26 words with examples; and
+"advanced_words", 2477 idioms, phrasal verbs and word families). Each list is its own small file,
 loaded only on the visit that adds it. Each device gets them once on its next
 visit, web or installed app; a player who deletes one doesn't get it back, and a set is
 skipped if the player already imported the same words. To add another, drop its CSV in

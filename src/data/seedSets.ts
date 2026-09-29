@@ -5,12 +5,20 @@
 // weigh down every page load.
 import { SEEDED_SETS_KEY } from '@/utils/storageKeys';
 import { wordsFromCsvText } from '@/data/wordListImport';
-import { addWordSetWithId, getLastSelectedSetId, loadWordSets, setLastSelectedSetId } from '@/data/wordSetStore';
+import {
+  addWordSetWithId,
+  getLastSelectedSetId,
+  loadWordSets,
+  renameWordSet,
+  setLastSelectedSetId,
+} from '@/data/wordSetStore';
 import { termKey } from '@/data/progressStore';
 
 interface SeedSet {
   id: string;
   name: string;
+  // names this set shipped with before; a device still showing one gets the new name
+  previousNames?: string[];
   fileName: string;
   loadCsv: () => Promise<string>;
 }
@@ -31,7 +39,8 @@ const SEED_SETS: SeedSet[] = [
   },
   {
     id: 'seed-advanced-b2-c1',
-    name: 'Nâng cao B2–C1 (idioms, phrasal verbs)',
+    name: 'advanced_words',
+    previousNames: ['Nâng cao B2–C1 (idioms, phrasal verbs)'],
     fileName: 'defaultVocabulary4_typing.csv',
     loadCsv: () => import('./seed/advanced-b2-c1.csv?raw').then((m) => m.default),
   },
@@ -52,9 +61,21 @@ function sameWords(a: string[], b: string[]): boolean {
   return b.every((term) => set.has(term));
 }
 
+// A built-in set renamed in a later release: update devices that still show the old
+// name, but never a name the player chose.
+function applyRenames(): void {
+  const sets = loadWordSets();
+  for (const seed of SEED_SETS) {
+    if (!seed.previousNames) continue;
+    const set = sets.find((s) => s.id === seed.id);
+    if (set && seed.previousNames.includes(set.name)) renameWordSet(seed.id, seed.name);
+  }
+}
+
 // Resolves to true when at least one set was added.
 export async function seedWordSets(): Promise<boolean> {
   if (typeof localStorage === 'undefined') return false;
+  applyRenames();
   const seeded = loadSeeded();
   const pending = SEED_SETS.filter((seed) => !seeded.includes(seed.id));
   if (pending.length === 0) return false;
