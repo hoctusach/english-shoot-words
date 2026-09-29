@@ -6,3 +6,4 @@ export const VOICE_KEY = 'shootwords.voice.v1';
 export const LANG_KEY = 'shootwords.lang.v1';
 export const PROGRESS_KEY_PREFIX = 'shootwords.progress.v1.';
 export const SEEDED_SETS_KEY = 'shootwords.seededSets.v1';
+export const LAST_PLAYED_SET_KEY = 'shootwords.lastPlayedSetId.v1';

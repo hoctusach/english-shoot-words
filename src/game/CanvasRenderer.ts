@@ -35,6 +35,8 @@ export interface RenderScene {
 export class CanvasRenderer {
   private dpr = window.devicePixelRatio || 1;
   private resizeObserver: ResizeObserver;
+  // resizing clears the canvas; a paused game uses this to paint its still frame again
+  afterResize: (() => void) | null = null;
 
   constructor(
     private canvas: HTMLCanvasElement,
@@ -64,6 +66,7 @@ export class CanvasRenderer {
     this.canvas.style.width = `${width}px`;
     this.canvas.style.height = `${height}px`;
     this.ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+    this.afterResize?.();
   }
 
   render(scene: RenderScene): void {

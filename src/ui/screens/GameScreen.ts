@@ -1,4 +1,4 @@
-import type { App } from '@/App';
+import type { App, ShowGameOptions } from '@/App';
 import type { WordSet } from '@/types/wordset';
 import type { ScreenHandle } from '@/ui/ScreenManager';
 import { GameEngine, SHAKE_MS } from '@/game/GameEngine';
@@ -9,7 +9,12 @@ import { formatSpeed } from '@/game/DifficultyCurve';
 import { t } from '@/i18n';
 import { track } from '@/analytics';
 
-export function renderGameScreen(root: HTMLElement, app: App, wordSet: WordSet): ScreenHandle | void {
+export function renderGameScreen(
+  root: HTMLElement,
+  app: App,
+  wordSet: WordSet,
+  options: ShowGameOptions = {},
+): ScreenHandle | void {
   const wrap = document.createElement('div');
   wrap.className = 'screen screen-game';
 
@@ -39,6 +44,7 @@ export function renderGameScreen(root: HTMLElement, app: App, wordSet: WordSet):
       <div class="pause-overlay">
         <div class="pause-card">
           <p class="pause-title">${t('paused')}</p>
+          <p class="pause-sub"></p>
           <button class="btn btn-primary resume-btn">${t('resumeBtn')}</button>
         </div>
       </div>
@@ -54,6 +60,7 @@ export function renderGameScreen(root: HTMLElement, app: App, wordSet: WordSet):
   const canvasContainer = wrap.querySelector<HTMLDivElement>('.canvas-container')!;
   const pauseOverlay = wrap.querySelector<HTMLDivElement>('.pause-overlay')!;
   const pauseTitle = wrap.querySelector<HTMLParagraphElement>('.pause-title')!;
+  const pauseSub = wrap.querySelector<HTMLParagraphElement>('.pause-sub')!;
   const resumeBtn = wrap.querySelector<HTMLButtonElement>('.resume-btn')!;
   const pauseBtn = wrap.querySelector<HTMLButtonElement>('.pause-btn')!;
   const speedValue = wrap.querySelector<HTMLSpanElement>('.speed-value')!;
@@ -81,6 +88,7 @@ export function renderGameScreen(root: HTMLElement, app: App, wordSet: WordSet):
   });
 
   let pausedForKeyboard = false;
+  let waitingToStart = !!options.waitForStart;
   let hintTimer: number | undefined;
   let shakeTimer: number | undefined;
 
@@ -122,9 +130,20 @@ export function renderGameScreen(root: HTMLElement, app: App, wordSet: WordSet):
       pauseOverlay.classList.toggle('visible', paused);
       pauseBtn.textContent = paused ? '▶' : '⏸';
       pauseBtn.setAttribute('aria-label', paused ? t('resume') : t('pause'));
-      pauseTitle.textContent = pausedForKeyboard ? t('keyboardHidden') : t('paused');
-      resumeBtn.textContent = pausedForKeyboard ? t('resumeKeyboard') : t('resumeBtn');
-      if (!paused) pausedForKeyboard = false;
+      if (waitingToStart) {
+        pauseTitle.textContent = t('readyTitle');
+        pauseSub.textContent = wordSet.name;
+        resumeBtn.textContent = t('startBtn');
+      } else {
+        pauseTitle.textContent = pausedForKeyboard ? t('keyboardHidden') : t('paused');
+        pauseSub.textContent = '';
+        resumeBtn.textContent = pausedForKeyboard ? t('resumeKeyboard') : t('resumeBtn');
+      }
+      document.body.classList.toggle('game-waiting', waitingToStart && paused);
+      if (!paused) {
+        pausedForKeyboard = false;
+        waitingToStart = false;
+      }
     },
     onSpeedChange: (factor) => {
       roundSpeed = factor;
@@ -162,7 +181,16 @@ export function renderGameScreen(root: HTMLElement, app: App, wordSet: WordSet):
   });
   wrap.querySelector('.quit-btn')!.addEventListener('click', () => app.showMenu());
 
-  engine.start();
+  // Opened by the app itself: wait for a tap, which is also what lets a phone open its
+  // keyboard. On a computer, Enter or Space starts too.
+  const startOnKey = (e: KeyboardEvent) => {
+    if (waitingToStart && (e.key === 'Enter' || e.key === ' ')) {
+      e.preventDefault();
+      engine.togglePause();
+    }
+  };
+  window.addEventListener('keydown', startOnKey);
+  engine.start({ paused: waitingToStart });
   track('game_start', { set_size: wordSet.words.length, speed: roundSpeed, touch: isTouch });
 
   return {
@@ -170,12 +198,13 @@ export function renderGameScreen(root: HTMLElement, app: App, wordSet: WordSet):
       if (!roundEnded) track('game_quit', roundStats());
       window.clearTimeout(hintTimer);
       window.clearTimeout(shakeTimer);
+      window.removeEventListener('keydown', startOnKey);
       stopKeyboardWatch();
       engine.destroy();
       hud.destroy();
       meaningToast.destroy();
       stopViewportTracking();
-      document.body.classList.remove('game-active');
+      document.body.classList.remove('game-active', 'game-waiting');
     },
   };
 }

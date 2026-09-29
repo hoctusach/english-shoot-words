@@ -3,6 +3,12 @@ const MIN_INTERVAL_MS = 60_000;
 
 let lastCheck = 0;
 
+// A round waiting on its start card hasn't begun, so it may still be reloaded.
+function roundInProgress(): boolean {
+  const body = document.body.classList;
+  return body.contains('game-active') && !body.contains('game-waiting');
+}
+
 // Phones can keep serving an old copy of the page long after a deploy (a restored
 // tab, a home-screen icon, an in-app browser). Fetch the current index.html past the
 // cache and, if it points at a different script bundle than the one running, reload
@@ -11,7 +17,7 @@ export async function checkForNewBuild(): Promise<void> {
   const running = document.querySelector<HTMLScriptElement>('script[src*="assets/index-"]');
   if (!running) return; // dev server
   // never pull the page out from under a round in progress
-  if (document.body.classList.contains('game-active')) return;
+  if (roundInProgress()) return;
 
   try {
     const base = import.meta.env.BASE_URL;
@@ -24,7 +30,7 @@ export async function checkForNewBuild(): Promise<void> {
     // page is cached somewhere we can't reach): don't loop. A newer build can still
     // reload later in the same tab.
     if (sessionStorage.getItem(TARGET_KEY) === latest) return;
-    if (document.body.classList.contains('game-active')) return;
+    if (roundInProgress()) return;
     sessionStorage.setItem(TARGET_KEY, latest);
     location.replace(`${base}?v=${Date.now()}`);
   } catch {

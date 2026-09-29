@@ -5,13 +5,7 @@
 // weigh down every page load.
 import { SEEDED_SETS_KEY } from '@/utils/storageKeys';
 import { wordsFromCsvText } from '@/data/wordListImport';
-import {
-  addWordSetWithId,
-  getLastSelectedSetId,
-  loadWordSets,
-  renameWordSet,
-  setLastSelectedSetId,
-} from '@/data/wordSetStore';
+import { addWordSetWithId, loadWordSets, renameWordSet } from '@/data/wordSetStore';
 import { termKey } from '@/data/progressStore';
 
 interface SeedSet {
@@ -23,7 +17,8 @@ interface SeedSet {
   loadCsv: () => Promise<string>;
 }
 
-// Listed in the order a fresh device shows them; the first becomes the Continue set.
+// Listed in the order a fresh device shows them.
+export const FIRST_PLAY_SET_ID = 'seed-ways-of-walking-c1';
 const SEED_SETS: SeedSet[] = [
   {
     id: 'seed-movers-a1',
@@ -104,10 +99,7 @@ export async function seedWordSets(): Promise<boolean> {
       createdAt: new Date().toISOString(),
       sourceFileName: seed.fileName,
     });
-    if (added) {
-      addedAny = true;
-      if (!getLastSelectedSetId()) setLastSelectedSetId(seed.id);
-    }
+    if (added) addedAny = true;
   }
 
   try {

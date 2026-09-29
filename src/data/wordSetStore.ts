@@ -1,4 +1,4 @@
-import { WORD_SETS_KEY, LAST_SELECTED_SET_KEY } from '@/utils/storageKeys';
+import { WORD_SETS_KEY, LAST_SELECTED_SET_KEY, LAST_PLAYED_SET_KEY } from '@/utils/storageKeys';
 import type { WordSet, WordSetWord } from '@/types/wordset';
 import { deleteProgress } from '@/data/progressStore';
 
@@ -65,6 +65,9 @@ export function deleteWordSet(id: string): void {
   if (getLastSelectedSetId() === id) {
     clearLastSelectedSetId();
   }
+  if (getLastPlayedSetId() === id && hasLocalStorage()) {
+    localStorage.removeItem(LAST_PLAYED_SET_KEY);
+  }
 }
 
 export function setWordSetSpeedFactor(id: string, factor: number): void {
@@ -98,4 +101,15 @@ export function setLastSelectedSetId(id: string): void {
 function clearLastSelectedSetId(): void {
   if (!hasLocalStorage()) return;
   localStorage.removeItem(LAST_SELECTED_SET_KEY);
+}
+
+// The set of the last round actually played (the app reopens straight into it).
+export function getLastPlayedSetId(): string | null {
+  if (!hasLocalStorage()) return null;
+  return localStorage.getItem(LAST_PLAYED_SET_KEY);
+}
+
+export function setLastPlayedSetId(id: string): void {
+  if (!hasLocalStorage()) return;
+  localStorage.setItem(LAST_PLAYED_SET_KEY, id);
 }

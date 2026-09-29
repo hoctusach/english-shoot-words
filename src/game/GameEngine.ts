@@ -96,6 +96,9 @@ export class GameEngine {
     if (!ctx) throw new Error('Canvas 2D context unavailable');
     this.ctx = ctx;
     this.renderer = new CanvasRenderer(canvas, this.ctx, getThemeById(getBackgroundThemeId()));
+    this.renderer.afterResize = () => {
+      if (this.running && this.paused) this.draw(performance.now());
+    };
     this.wordSetId = wordSet.id;
     this.speedFactor = snapSpeedFactor(wordSet.speedFactor ?? defaultSpeedForSet(wordSet.words));
     this.progress = new ProgressTracker(wordSet.id);
@@ -111,7 +114,9 @@ export class GameEngine {
     );
   }
 
-  start(): void {
+  // `paused`: set the round up and show it still, waiting for a tap to begin (used
+  // when the app opens straight into a round: a phone keyboard only opens on a tap).
+  start({ paused = false }: { paused?: boolean } = {}): void {
     this.running = true;
     this.paused = false;
     this.lastFrameTime = performance.now();
@@ -121,6 +126,12 @@ export class GameEngine {
     this.input.focus();
     document.addEventListener('visibilitychange', this.handleVisibility);
     window.addEventListener('keydown', this.handleKeydown);
+    if (paused) {
+      this.draw(this.lastFrameTime);
+      this.paused = true;
+      this.events.onPauseChange?.(true);
+      return;
+    }
     this.rafId = requestAnimationFrame(this.loop);
   }
 
@@ -195,6 +206,11 @@ export class GameEngine {
     this.lastFrameTime = time;
     this.update(time, dt);
     if (!this.running) return;
+    this.draw(time);
+    this.rafId = requestAnimationFrame(this.loop);
+  };
+
+  private draw(time: number): void {
     const shakeLeft = Math.max(0, this.shakeUntil - time) / SHAKE_MS;
     const shakePx = this.renderer.widthCss < SMALL_SCREEN_PX ? SHAKE_PX_SMALL_SCREEN : SHAKE_PX;
     const amplitude = shakePx * shakeLeft * shakeLeft;
@@ -214,8 +230,7 @@ export class GameEngine {
       particles: this.particles,
       aim: this.aimTarget(),
     });
-    this.rafId = requestAnimationFrame(this.loop);
-  };
+  }
 
   private update(time: number, dt: number): void {
     const interval = spawnIntervalMs(this.scoreState.level, this.speedFactor);

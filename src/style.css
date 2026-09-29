@@ -1014,6 +1014,17 @@ body.game-active {
   display: flex;
 }
 
+.pause-sub {
+  margin: -6px 0 0;
+  font-size: 14px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.pause-sub:empty {
+  display: none;
+}
+
 .pause-card {
   display: flex;
   flex-direction: column;
