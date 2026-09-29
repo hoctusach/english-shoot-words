@@ -1,6 +1,7 @@
 // Word sets that ship with the game, so a first visit (web or installed app) has
 // something to play right away. Each is added once per device: a player who deletes
 // one doesn't get it back, and nobody gets a second copy of words they imported.
+import moversA1Csv from './seed/movers-a1.csv?raw';
 import waysOfWalkingCsv from './seed/ways-of-walking-c1.csv?raw';
 import { SEEDED_SETS_KEY } from '@/utils/storageKeys';
 import { wordsFromCsvText } from '@/data/wordListImport';
@@ -14,7 +15,14 @@ interface SeedSet {
   csv: string;
 }
 
+// Listed in the order a fresh device shows them; the first becomes the Continue set.
 const SEED_SETS: SeedSet[] = [
+  {
+    id: 'seed-movers-a1',
+    name: 'Movers A1',
+    fileName: 'movers_wordlist_a1only.csv',
+    csv: moversA1Csv,
+  },
   {
     id: 'seed-ways-of-walking-c1',
     name: 'Ways of Walking (C1)',

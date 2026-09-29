@@ -19,7 +19,7 @@ you can rename afterwards from "Saved word sets".
 ## Built-in sets
 
 `src/data/seed/*.csv` files listed in `src/data/seedSets.ts` ship with the game (today:
-"Ways of Walking (C1)", 26 words with examples). Each device gets them once on its next
+"Movers A1", 740 words, and "Ways of Walking (C1)", 26 words with examples). Each device gets them once on its next
 visit, web or installed app; a player who deletes one doesn't get it back, and a set is
 skipped if the player already imported the same words. To add another, drop its CSV in
 `src/data/seed/` and add an entry with a new fixed `id`.

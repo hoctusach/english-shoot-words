@@ -1,0 +1,740 @@
+ant,con kiến
+bear,con gấu
+butterfly,con bướm
+giraffe,con hươu cao cổ
+goat,con dê
+hamster,con chuột hamster
+kangaroo,con kangaroo
+lion,con sư tử
+panda,gấu trúc
+parrot,con vẹt
+snake,con rắn
+spider,con nhện
+tiger,con hổ
+turtle,con rùa
+zebra,con ngựa vằn
+owl,con cú
+penguin,chim cánh cụt
+dolphin,cá heo
+shark,cá mập
+insect,côn trùng
+back,lưng
+finger,ngón tay
+neck,cổ
+shoulder,vai
+stomach,bụng
+tooth,răng
+toe,ngón chân
+body,cơ thể
+knee,đầu gối
+boots,giày ống
+cap,mũ lưỡi trai
+gloves,găng tay
+jumper,áo len
+scarf,khăn quàng cổ
+sweater,áo len
+umbrella,cái ô
+uniform,đồng phục
+belt,thắt lưng
+glasses,kính mắt
+pyjamas,đồ ngủ
+gold,màu vàng kim
+silver,màu bạc
+hundred,một trăm
+aunt,"cô, dì"
+child,đứa trẻ
+cousin,anh chị em họ
+daughter,con gái
+grandfather,ông
+grandmother,bà
+parent,cha mẹ
+son,con trai
+uncle,"chú, bác"
+friend,bạn bè
+breakfast,bữa sáng
+carrot,cà rốt
+chocolate,sô-cô-la
+coffee,cà phê
+cookie,bánh quy
+dinner,bữa tối
+food,thức ăn
+fruit,trái cây
+grape,nho
+lemon,chanh
+lunch,bữa trưa
+meat,thịt
+pasta,mì Ý
+pear,lê
+pizza,bánh pizza
+potato,khoai tây
+salad,rau trộn
+sandwich,bánh sandwich
+soup,súp
+strawberry,dâu tây
+sugar,đường
+tea,trà
+tomato,cà chua
+vegetable,rau củ
+watermelon,dưa hấu
+burger,hamburger
+honey,mật ong
+yoghurt,sữa chua
+sausage,xúc xích
+clock,đồng hồ
+cupboard,tủ
+desk,bàn học
+garden,khu vườn
+lamp,đèn
+living room,phòng khách
+mirror,gương
+picture,bức tranh
+shower,vòi hoa sen
+sofa,ghế sofa
+television,ti vi
+wall,bức tường
+fridge,tủ lạnh
+shelf,kệ sách
+stairs,cầu thang
+key,chìa khóa
+garage,nhà để xe
+balloon,bóng bay
+blackboard,bảng đen
+camera,máy ảnh
+card,tấm thiệp
+classroom,lớp học
+computer,máy tính
+crayon,bút sáp màu
+dictionary,từ điển
+game,trò chơi
+map,bản đồ
+phone,điện thoại
+photo,tấm ảnh
+story,câu chuyện
+word,từ
+paint,sơn
+scissors,cái kéo
+homework,bài tập về nhà
+lesson,bài học
+basketball,bóng rổ
+bicycle,xe đạp
+cycling,đạp xe
+guitar,đàn ghi ta
+piano,đàn piano
+skateboard,ván trượt
+ski,trượt tuyết
+sport,thể thao
+tennis,quần vợt
+volleyball,bóng chuyền
+hobby,sở thích
+camping,cắm trại
+fishing,câu cá
+cloudy,nhiều mây
+rainy,có mưa
+snowy,có tuyết
+sunny,nắng
+weather,thời tiết
+windy,có gió
+beach,bãi biển
+forest,khu rừng
+mountain,núi
+river,dòng sông
+grass,cỏ
+island,hòn đảo
+lake,hồ
+week,tuần
+month,tháng
+year,năm
+tomorrow,ngày mai
+yesterday,hôm qua
+hour,giờ
+minute,phút
+spring,mùa xuân
+summer,mùa hè
+autumn,mùa thu
+winter,mùa đông
+birthday,sinh nhật
+holiday,kỳ nghỉ
+airport,sân bay
+bus stop,trạm xe buýt
+ship,tàu thủy
+station,nhà ga
+city,thành phố
+supermarket,siêu thị
+hospital,bệnh viện
+zoo,sở thú
+farm,nông trại
+cafe,quán cà phê
+restaurant,nhà hàng
+road,con đường
+bridge,cây cầu
+bank,ngân hàng
+doctor,bác sĩ
+nurse,y tá
+farmer,nông dân
+driver,tài xế
+cook,đầu bếp
+pilot,phi công
+singer,ca sĩ
+dancer,vũ công
+artist,họa sĩ
+police officer,cảnh sát
+firefighter,lính cứu hỏa
+vet,bác sĩ thú y
+shop assistant,nhân viên bán hàng
+fast,nhanh
+slow,chậm
+angry,tức giận
+scared,sợ hãi
+tired,mệt mỏi
+hungry,đói
+thirsty,khát
+clean,sạch sẽ
+dirty,bẩn
+young,trẻ
+beautiful,đẹp
+ugly,xấu xí
+easy,dễ
+difficult,khó
+heavy,nặng
+light,nhẹ
+strong,khỏe mạnh
+weak,yếu
+funny,hài hước
+noisy,ồn ào
+quiet,yên tĩnh
+full,đầy
+empty,trống rỗng
+wet,ướt
+dry,khô
+hard,cứng
+soft,mềm
+expensive,đắt
+cheap,rẻ
+carry,"mang, vác"
+catch,bắt
+climb,trèo
+cry,khóc
+drive,lái xe
+fall,ngã
+laugh,cười
+learn,học
+make,"làm, tạo ra"
+meet,gặp gỡ
+smile,mỉm cười
+speak,nói chuyện
+study,học tập
+talk,nói chuyện
+teach,dạy học
+think,suy nghĩ
+throw,ném
+travel,du lịch
+wait,chờ đợi
+wake up,thức dậy
+wash,"rửa, giặt"
+watch,xem
+wear,mặc
+buy,mua
+cut,cắt
+find,tìm thấy
+finish,hoàn thành
+hold,"cầm, giữ"
+live,sống
+love,yêu thích
+need,cần
+push,đẩy
+pull,kéo
+send,gửi
+show,cho xem
+start,bắt đầu
+stop,dừng lại
+take,"lấy, cầm"
+tell,kể
+turn,"xoay, rẽ"
+visit,thăm
+want,muốn
+work,làm việc
+next to,bên cạnh
+behind,phía sau
+in front of,phía trước
+between,ở giữa
+near,gần
+above,phía trên
+below,phía dưới
+when,khi nào
+why,tại sao
+which,cái nào
+Monday,Thứ Hai
+Tuesday,Thứ Ba
+Wednesday,Thứ Tư
+Thursday,Thứ Năm
+Friday,Thứ Sáu
+Saturday,Thứ Bảy
+Sunday,Chủ Nhật
+January,Tháng Một
+February,Tháng Hai
+March,Tháng Ba
+April,Tháng Tư
+May,Tháng Năm
+June,Tháng Sáu
+July,Tháng Bảy
+August,Tháng Tám
+September,Tháng Chín
+October,Tháng Mười
+November,Tháng Mười Một
+December,Tháng Mười Hai
+Christmas,Giáng Sinh
+New Year,Năm Mới
+Easter,Lễ Phục Sinh
+Halloween,Lễ Hội Ma
+Valentine's Day,Ngày Lễ Tình Nhân
+Mother's Day,Ngày Của Mẹ
+Father's Day,Ngày Của Cha
+Thanksgiving,Lễ Tạ Ơn
+Children's Day,Ngày Quốc Tế Thiếu Nhi
+Teacher's Day,Ngày Nhà Giáo
+was,đã là (số ít) - quá khứ của is/am
+were,đã là (số nhiều) - quá khứ của are
+had,đã có - quá khứ của have
+did,đã làm - quá khứ của do
+went,đã đi - quá khứ của go
+came,đã đến - quá khứ của come
+saw,đã nhìn thấy - quá khứ của see
+ate,đã ăn - quá khứ của eat
+drank,đã uống - quá khứ của drink
+said,đã nói - quá khứ của say
+took,đã lấy - quá khứ của take
+made,đã làm/tạo ra - quá khứ của make
+gave,đã đưa - quá khứ của give
+got,đã nhận được - quá khứ của get
+found,đã tìm thấy - quá khứ của find
+read,đã đọc - quá khứ của read
+wrote,đã viết - quá khứ của write
+ran,đã chạy - quá khứ của run
+sat,đã ngồi - quá khứ của sit
+stood,đã đứng - quá khứ của stand
+slept,đã ngủ - quá khứ của sleep
+swam,đã bơi - quá khứ của swim
+flew,đã bay - quá khứ của fly
+bought,đã mua - quá khứ của buy
+brought,đã mang đến - quá khứ của bring
+caught,đã bắt - quá khứ của catch
+thought,đã nghĩ - quá khứ của think
+taught,đã dạy - quá khứ của teach
+told,đã kể - quá khứ của tell
+sent,đã gửi - quá khứ của send
+spent,đã tiêu/dùng - quá khứ của spend
+left,đã rời đi - quá khứ của leave
+felt,đã cảm thấy - quá khứ của feel
+kept,đã giữ - quá khứ của keep
+met,đã gặp - quá khứ của meet
+won,đã thắng - quá khứ của win
+began,đã bắt đầu - quá khứ của begin
+drove,đã lái xe - quá khứ của drive
+rode,"đã cưỡi, đi (xe) - quá khứ của ride"
+grew,đã lớn lên - quá khứ của grow
+knew,đã biết - quá khứ của know
+threw,đã ném - quá khứ của throw
+wore,đã mặc - quá khứ của wear
+broke,đã làm vỡ - quá khứ của break
+spoke,đã nói chuyện - quá khứ của speak
+woke,đã thức dậy - quá khứ của wake
+chose,đã chọn - quá khứ của choose
+fell,đã ngã - quá khứ của fall
+held,"đã cầm, giữ - quá khứ của hold"
+heard,đã nghe - quá khứ của hear
+lost,"đã mất, thua - quá khứ của lose"
+sang,đã hát - quá khứ của sing
+understood,đã hiểu - quá khứ của understand
+put,đã đặt - quá khứ của put (không đổi dạng)
+played,đã chơi - quá khứ của play
+walked,đã đi bộ - quá khứ của walk
+watched,đã xem - quá khứ của watch
+cooked,đã nấu ăn - quá khứ của cook
+helped,đã giúp đỡ - quá khứ của help
+jumped,đã nhảy - quá khứ của jump
+cleaned,đã dọn dẹp - quá khứ của clean
+cried,đã khóc - quá khứ của cry
+studied,đã học - quá khứ của study
+visited,đã thăm - quá khứ của visit
+listened,đã lắng nghe - quá khứ của listen
+looked,đã nhìn - quá khứ của look
+wanted,đã muốn - quá khứ của want
+finished,đã hoàn thành - quá khứ của finish
+opened,đã mở - quá khứ của open
+closed,đã đóng - quá khứ của close
+talked,đã nói chuyện - quá khứ của talk
+worked,đã làm việc - quá khứ của work
+lived,đã sống - quá khứ của live
+loved,đã yêu thích - quá khứ của love
+eleven,mười một
+twelve,mười hai
+thirteen,mười ba (chú ý: three -> thir + teen)
+fourteen,mười bốn
+fifteen,mười lăm (chú ý: five -> fif + teen)
+sixteen,mười sáu
+seventeen,mười bảy
+eighteen,"mười tám (chú ý: eight + teen, chỉ 1 chữ t)"
+nineteen,mười chín
+twenty,hai mươi
+thirty,ba mươi (chú ý: three -> thir + ty)
+forty,"bốn mươi (chú ý: KHÔNG có chữ u như four - viết forty, không phải fourty)"
+fifty,năm mươi (chú ý: five -> fif + ty)
+sixty,sáu mươi
+seventy,bảy mươi
+eighty,tám mươi
+ninety,chín mươi (chú ý: nine bỏ chữ e trước khi thêm ty)
+first,thứ nhất
+second,thứ hai
+third,thứ ba
+fourth,thứ tư
+fifth,thứ năm (chú ý: five bỏ 've' thành fif + th)
+sixth,thứ sáu
+seventh,thứ bảy
+eighth,"thứ tám (chú ý: eight + th, chỉ 1 chữ t ở giữa)"
+ninth,thứ chín (chú ý: nine bỏ chữ e trước khi thêm th)
+tenth,thứ mười
+eleventh,thứ mười một
+twelfth,thứ mười hai (chú ý: twelve bỏ 've' thành twelf + th)
+thirteenth,thứ mười ba
+fourteenth,thứ mười bốn
+fifteenth,thứ mười lăm
+sixteenth,thứ mười sáu
+seventeenth,thứ mười bảy
+eighteenth,thứ mười tám
+nineteenth,thứ mười chín
+twentieth,thứ hai mươi (chú ý: các số hàng chục đổi y thành ie rồi + th: twenty -> twentieth)
+thirtieth,"thứ ba mươi (quy tắc: thirty -> thirtieth, đổi y thành ie)"
+fortieth,"thứ bốn mươi (quy tắc: forty -> fortieth, đổi y thành ie)"
+fiftieth,"thứ năm mươi (quy tắc: fifty -> fiftieth, đổi y thành ie)"
+sixtieth,"thứ sáu mươi (quy tắc: sixty -> sixtieth, đổi y thành ie)"
+seventieth,"thứ bảy mươi (quy tắc: seventy -> seventieth, đổi y thành ie)"
+eightieth,"thứ tám mươi (quy tắc: eighty -> eightieth, đổi y thành ie)"
+ninetieth,"thứ chín mươi (quy tắc: ninety -> ninetieth, đổi y thành ie)"
+twenty-one,hai mươi mốt (mẫu: [hàng chục]-[hàng đơn vị])
+twenty-five,hai mươi lăm
+thirty-two,ba mươi hai
+forty-six,bốn mươi sáu
+fifty-three,năm mươi ba
+sixty-eight,sáu mươi tám
+seventy-four,bảy mươi tư
+eighty-nine,tám mươi chín
+ninety-seven,chín mươi bảy
+address,địa chỉ
+afraid,sợ hãi
+after,sau khi
+age,tuổi
+all,tất cả
+all right,"ổn, được rồi"
+along,dọc theo
+always,luôn luôn
+another,một cái khác
+any,"bất kỳ, nào"
+app,ứng dụng
+around,xung quanh
+asleep,đang ngủ
+at,"lúc (chỉ giờ), ở"
+awake,"thức, tỉnh táo"
+bad,"tệ, xấu"
+badly,một cách tệ
+balcony,ban công
+band,ban nhạc
+basement,tầng hầm
+bat,con dơi
+be called,"được gọi là, tên là"
+beard,râu (cằm)
+because,bởi vì
+before,trước khi
+best,tốt nhất
+better,tốt hơn
+blanket,cái chăn
+blonde,tóc vàng hoe
+boring,nhàm chán
+both,cả hai
+bottle,cái chai
+bottom,"đáy, phía dưới cùng"
+bowl,cái bát
+brave,dũng cảm
+break,giờ giải lao
+brilliant,tuyệt vời
+bring,mang đến
+build,xây dựng
+building,tòa nhà
+bus station,bến xe buýt
+busy,bận rộn
+by,"bởi, bên cạnh"
+cage,cái lồng
+call,"gọi điện, gọi"
+car park,bãi đỗ xe
+careful,cẩn thận
+carefully,một cách cẩn thận
+CD,đĩa CD
+centre,trung tâm
+change,thay đổi
+Charlie,tên riêng (nam)
+cheese,phô mai
+cinema,rạp chiếu phim
+circle,hình tròn
+circus,rạp xiếc
+city centre,trung tâm thành phố
+town centre,trung tâm thị trấn
+Clare,tên riêng (nữ)
+clever,thông minh
+cloud,đám mây
+clown,chú hề
+coat,áo khoác
+cold,"lạnh, bị cảm lạnh"
+come on,"nhanh lên, cố lên"
+comic,truyện tranh
+comic book,cuốn truyện tranh
+Daisy,tên riêng (nữ)
+dance,"nhảy múa, điệu nhảy"
+dangerous,nguy hiểm
+dentist,nha sĩ
+cough,"ho, cơn ho"
+difference,sự khác nhau
+different,khác nhau
+could,có thể (quá khứ của can)
+country,"đất nước, nông thôn"
+countryside,vùng nông thôn
+cup,"cái cốc, tách"
+curly,xoăn
+down,xuống
+downstairs,tầng dưới
+dream,"giấc mơ, mơ"
+dress up,"hóa trang, ăn diện"
+drop,làm rơi
+DVD,đĩa DVD
+earache,đau tai
+e-book,sách điện tử
+elevator,thang máy
+email,"thư điện tử, gửi email"
+every,"mỗi, mọi"
+everyone,mọi người
+everything,mọi thứ
+exciting,"thú vị, hào hứng"
+excuse me,xin lỗi (làm phiền)
+fair,"tóc vàng nhạt, công bằng"
+famous,nổi tiếng
+fat,béo
+feed,cho ăn
+field,cánh đồng
+film,bộ phim
+film star,ngôi sao điện ảnh
+fine,"khỏe, ổn"
+fish,"câu cá, con cá"
+fix,sửa chữa
+floor,"tầng, sàn nhà"
+fly,"con ruồi, bay"
+Fred,tên riêng (nam)
+frightened,hoảng sợ
+funfair,hội chợ vui chơi
+get dressed,mặc quần áo
+get off,xuống xe
+get on,lên xe
+get undressed,cởi quần áo
+have to,phải
+have got to,phải
+headache,đau đầu
+helmet,mũ bảo hiểm
+help,giúp đỡ
+hide,"trốn, giấu"
+get up,thức dậy
+glass,cái cốc thủy tinh
+go shopping,đi mua sắm
+goal,bàn thắng
+hop,nhảy lò cò
+hot,nóng
+granddaughter,cháu gái
+grandparent,ông bà
+grandson,cháu trai
+how,như thế nào
+how much,bao nhiêu (tiền)
+how often,bao lâu một lần
+huge,khổng lồ
+ground,mặt đất
+grow,"lớn lên, trồng"
+grown-up,người lớn
+hurt,"làm đau, bị đau"
+ice,"băng, đá"
+ice skates,giày trượt băng
+ice skating,trượt băng
+idea,ý tưởng
+ill,ốm
+inside,bên trong
+internet,mạng internet
+into,vào trong
+invite,mời
+Jack,tên riêng (nam)
+Jane,tên riêng (nữ)
+Jim,tên riêng (nam)
+Julia,tên riêng (nữ)
+jungle,rừng rậm
+kick,đá
+kind,"loại, tốt bụng"
+kitten,mèo con
+laptop,máy tính xách tay
+last,"cuối cùng, trước"
+leaf,chiếc lá
+leaves,những chiếc lá (số nhiều của leaf)
+library,thư viện
+lift,thang máy
+Lily,tên riêng (nữ)
+little,"nhỏ bé, một chút"
+look for,tìm kiếm
+lose,"mất, thua"
+loud,"to, ầm ĩ"
+loudly,một cách ầm ĩ
+machine,máy móc
+market,chợ
+Mary,tên riêng (nữ)
+matter,vấn đề (What's the matter?)
+mean,có nghĩa là
+message,tin nhắn
+milkshake,sữa lắc
+mistake,lỗi sai
+model,mô hình
+moon,mặt trăng
+more,nhiều hơn
+most,nhiều nhất
+moustache,ria mép
+move,"di chuyển, chuyển nhà"
+movie,bộ phim
+must,phải
+naughty,nghịch ngợm
+net,cái lưới
+never,không bao giờ
+noise,tiếng ồn
+noodles,mì sợi
+nothing,không có gì
+o'clock,giờ đúng
+off,"tắt, rời khỏi"
+often,thường xuyên
+on,"trên, vào (ngày)"
+only,chỉ
+opposite,đối diện
+out,ra ngoài
+out of,ra khỏi
+outside,bên ngoài
+pair,một đôi
+pancake,bánh kếp
+party,bữa tiệc
+Paul,tên riêng (nam)
+Peter,tên riêng (nam)
+picnic,buổi dã ngoại
+pirate,cướp biển
+place,nơi chốn
+plant,"cây, trồng cây"
+plate,cái đĩa
+player,người chơi
+pool,bể bơi
+pop star,ngôi sao nhạc pop
+practice,sự luyện tập
+practise,luyện tập
+present,món quà
+pretty,xinh xắn
+puppy,chó con
+put on,mặc vào
+quick,nhanh
+quickly,một cách nhanh chóng
+quietly,một cách yên lặng
+rabbit,con thỏ
+rain,mưa
+rainbow,cầu vồng
+ride,"chuyến đi, cưỡi"
+rock,tảng đá
+roller skates,giày trượt patin
+roller skating,trượt patin
+roof,mái nhà
+round,"tròn, vòng quanh"
+safe,an toàn
+sail,đi thuyền buồm
+Sally,tên riêng (nữ)
+sauce,nước sốt
+score,ghi bàn
+seat,chỗ ngồi
+shall,sẽ (đề nghị)
+shape,hình dạng
+shop,"mua sắm, cửa hàng"
+shopping,việc mua sắm
+shopping centre,trung tâm mua sắm
+shout,hét lên
+sick,ốm
+skate,"trượt patin, trượt băng"
+skip,nhảy dây
+sky,bầu trời
+slowly,một cách chậm rãi
+snail,con ốc sên
+snow,"tuyết, tuyết rơi"
+someone,ai đó
+something,cái gì đó
+sometimes,thỉnh thoảng
+sports centre,trung tâm thể thao
+square,"quảng trường, hình vuông"
+star,ngôi sao
+stomach-ache,đau bụng
+straight,thẳng
+surprised,ngạc nhiên
+sweet,"ngọt, kẹo"
+swim,bơi
+swimming pool,bể bơi
+swimsuit,đồ bơi
+take off,cởi ra
+tall,cao
+temperature,"nhiệt độ, sốt"
+terrible,kinh khủng
+text,"tin nhắn, nhắn tin"
+than,hơn (so sánh)
+then,sau đó
+thin,gầy
+ticket,vé
+teeth,răng (số nhiều của tooth)
+toothache,đau răng
+toothbrush,bàn chải đánh răng
+toothpaste,kem đánh răng
+top,"đỉnh, phía trên cùng"
+towel,khăn tắm
+town,thị trấn
+tractor,máy kéo
+treasure,kho báu
+trip,chuyến đi
+up,lên
+upstairs,tầng trên
+Vicky,tên riêng (nữ)
+video,"video, quay video"
+village,ngôi làng
+walk,đi bộ
+water,"tưới nước, nước"
+waterfall,thác nước
+wave,"vẫy tay, con sóng"
+website,trang web
+weekend,cuối tuần
+well,"khỏe, tốt"
+whale,cá voi
+where,ở đâu
+who,ai
+wind,gió
+world,thế giới
+worse,tệ hơn
+worst,tệ nhất
+would,sẽ (would like = muốn)
+wrong,sai
+Zoe,tên riêng (nữ)
+CD player,máy nghe đĩa CD
+first floor,tầng một
+hopping,đang nhảy lò cò (hop gấp đôi p)
+laughing,đang cười
+sailing,đi thuyền buồm
+videoing,đang quay video
+emailing,đang gửi email
+texting,đang nhắn tin
+thirty-six,ba mươi sáu
+thirty-eight,ba mươi tám
+forty-three,bốn mươi ba
+fifty-one,năm mươi mốt
+fifty-five,năm mươi lăm
+fifty-eight,năm mươi tám
+sixty-seven,sáu mươi bảy
+seventy-three,bảy mươi ba
+one hundred,một trăm
+cup of tea,một tách trà
+blonde hair,tóc vàng hoe
