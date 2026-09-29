@@ -50,10 +50,13 @@ function loadSeeded(): string[] {
   }
 }
 
+// Same list of words, ignoring repeats (sets imported before repeated rows were merged
+// still hold them).
 function sameWords(a: string[], b: string[]): boolean {
-  if (a.length !== b.length) return false;
-  const set = new Set(a);
-  return b.every((term) => set.has(term));
+  const setA = new Set(a);
+  const setB = new Set(b);
+  if (setA.size !== setB.size) return false;
+  return [...setB].every((term) => setA.has(term));
 }
 
 // A built-in set renamed in a later release: update devices that still show the old

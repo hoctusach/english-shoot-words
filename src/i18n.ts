@@ -5,10 +5,10 @@ export type Lang = 'vi' | 'en';
 export const LANGS: Lang[] = ['vi', 'en'];
 
 const en = {
-  appName: 'Game Bắn Từ',
-  appNameLead: 'Game ',
-  appNameAccent: 'Bắn',
-  appNameTail: ' Từ',
+  appName: 'Word Shooter',
+  appNameLead: 'Word ',
+  appNameAccent: 'Shooter',
+  appNameTail: '',
   tagline: 'Type the falling word to shoot it down — your own vocabulary, your own pace.',
   note: 'Switch your keyboard off Vietnamese input before playing. You can raise or lower the speed while playing. If the keyboard disappears, the game pauses — tap “⌨️ Open keyboard & play” to carry on.',
   player: 'Player',
