@@ -34,6 +34,7 @@ import {
   bottomMargin,
   TURRET_BARREL_LENGTH,
 } from './effects';
+import { normalizeForTyping } from './typing';
 
 export interface GameEngineEvents {
   onScoreChange?: (state: ScoreState) => void;
@@ -261,7 +262,7 @@ export class GameEngine {
   }
 
   private matchingWords(value: string): FallingWord[] {
-    return this.activeWords.filter((w) => w.term.toLowerCase().startsWith(value));
+    return this.activeWords.filter((w) => normalizeForTyping(w.term).startsWith(value));
   }
 
   // A word reached the danger line: jolt the screen, flash red, thud, buzz the phone.
@@ -323,14 +324,14 @@ export class GameEngine {
   }
 
   private handleInput(rawValue: string): void {
-    const value = rawValue.trim().toLowerCase();
+    const value = normalizeForTyping(rawValue.trim());
 
     if (!value) {
       this.validValue = '';
       return;
     }
 
-    const exactMatch = this.activeWords.find((w) => w.term.toLowerCase() === value);
+    const exactMatch = this.activeWords.find((w) => normalizeForTyping(w.term) === value);
     if (exactMatch) {
       this.killWord(exactMatch);
       return;

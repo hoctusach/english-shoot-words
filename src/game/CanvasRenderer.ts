@@ -9,6 +9,7 @@ import {
   bottomMargin,
   TURRET_BARREL_LENGTH,
 } from './effects';
+import { normalizeForTyping } from './typing';
 
 const WORD_FONT = '600 20px system-ui, -apple-system, sans-serif';
 const TARGET_COLOR = '#fde047';
@@ -145,7 +146,7 @@ export class CanvasRenderer {
     const ctx = this.ctx;
     const pulse = 0.5 + 0.5 * Math.sin(elapsedMs / 160);
     for (const word of words) {
-      const lowerTerm = word.term.toLowerCase();
+      const lowerTerm = normalizeForTyping(word.term);
       const isCandidate = !typedValue || lowerTerm.startsWith(typedValue);
       const matchLen = typedValue && isCandidate ? typedValue.length : 0;
       const hintLen = wrongHint && isCandidate && matchLen < word.term.length ? 1 : 0;
