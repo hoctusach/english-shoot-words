@@ -324,7 +324,8 @@ export class GameEngine {
   }
 
   private handleInput(rawValue: string): void {
-    const value = normalizeForTyping(rawValue.trim());
+    const raw = rawValue.trim();
+    const value = normalizeForTyping(raw);
 
     if (!value) {
       this.validValue = '';
@@ -345,6 +346,12 @@ export class GameEngine {
         this.wrongHint = false;
         playTick();
         this.fireAt(candidates.reduce((lowest, w) => (w.y > lowest.y ? w : lowest)));
+      } else if (NON_ASCII.test(raw)) {
+        // Vietnamese typing turned "was" into "wá": still on track, but the key did
+        // nothing visible, so say why
+        this.wrongHint = true;
+        this.flashInvalid();
+        this.events.onVietnameseInput?.();
       }
       return;
     }
@@ -352,7 +359,7 @@ export class GameEngine {
     // Vietnamese typing (Telex) left on turns w-a-s into "wá". Wiping that back to "wa"
     // resets the input method, so every retry gives "wá" again. Leave it in the field:
     // pressing the same key again makes the input method undo it ("wá" + s = "was").
-    if (NON_ASCII.test(value) && value.length <= this.validValue.length + 1) {
+    if (NON_ASCII.test(raw) && value.length <= this.validValue.length + 1) {
       this.wrongHint = true;
       this.flashInvalid();
       this.events.onVietnameseInput?.();

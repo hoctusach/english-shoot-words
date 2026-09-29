@@ -13,13 +13,17 @@ column holds an example sentence, shown (in italics, with the word highlighted) 
 meaning after the word is shot; leave it blank to show none. No header row is needed —
 every row is read as one word (a leading `Word,Meaning`-style header row is skipped
 automatically if present). CSV fields may be quoted, so meanings and examples can contain
-commas. Each imported file is saved as a single word set that
+commas. A word listed more than once becomes one entry with all its meanings. Accented
+letters and typographic punctuation in words (exposé, didn’t) can be typed with the
+plain keyboard letters (expose, didn't). Each imported file is saved as a single word set that
 you can rename afterwards from "Saved word sets".
 
 ## Built-in sets
 
 `src/data/seed/*.csv` files listed in `src/data/seedSets.ts` ship with the game (today:
-"Movers A1", 740 words, and "Ways of Walking (C1)", 26 words with examples). Each device gets them once on its next
+"Movers A1", 740 words; "Ways of Walking (C1)", 26 words with examples; and "Nâng cao
+B2–C1", 2477 idioms, phrasal verbs and word families). Each list is its own small file,
+loaded only on the visit that adds it. Each device gets them once on its next
 visit, web or installed app; a player who deletes one doesn't get it back, and a set is
 skipped if the player already imported the same words. To add another, drop its CSV in
 `src/data/seed/` and add an entry with a new fixed `id`.

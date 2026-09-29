@@ -20,6 +20,8 @@ function exampleHtml(example: string, term: string): string {
 }
 
 const EDGE_PADDING = 8;
+// meanings longer than this get the wide bubble (they are clamped to a few lines)
+const LONG_MEANING_CHARS = 60;
 
 export function createMeaningToast(container: HTMLElement): MeaningToastHandle {
   const el = document.createElement('div');
@@ -31,10 +33,10 @@ export function createMeaningToast(container: HTMLElement): MeaningToastHandle {
   return {
     show(term: string, meaning: string, example: string | undefined, x: number, y: number) {
       const hasExample = !!example && example.trim() !== '';
-      el.classList.toggle('has-example', hasExample);
+      el.classList.toggle('wide', hasExample || meaning.length > LONG_MEANING_CHARS);
       el.innerHTML = `
         <span class="meaning-bubble-term">${escapeHtml(term)}</span>
-        ${meaning ? `<span class="meaning-bubble-meaning">${escapeHtml(meaning)}</span>` : ''}
+        ${meaning ? `<span class="meaning-bubble-meaning" title="${escapeHtml(meaning)}">${escapeHtml(meaning)}</span>` : ''}
         ${hasExample ? `<span class="meaning-bubble-example">${exampleHtml(example!.trim(), term)}</span>` : ''}
       `;
       el.classList.remove('visible');

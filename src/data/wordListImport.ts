@@ -38,12 +38,31 @@ export function rowToWord(fields: string[]): WordSetWord | null {
   return { term, meaning: rest.filter(Boolean).join(', ') };
 }
 
+// A word listed more than once (a phrasal verb with several senses) becomes one entry
+// holding every distinct meaning: the game plays each word once, so later rows would
+// otherwise be silently dropped.
+function mergeInto(target: WordSetWord, extra: WordSetWord): void {
+  const meanings = target.meaning ? target.meaning.split('; ') : [];
+  if (extra.meaning && !meanings.includes(extra.meaning)) {
+    target.meaning = target.meaning ? `${target.meaning}; ${extra.meaning}` : extra.meaning;
+  }
+  if (!target.example && extra.example) target.example = extra.example;
+}
+
 function toWords(rows: string[][]): WordSetWord[] {
   const words: WordSetWord[] = [];
+  const byKey = new Map<string, WordSetWord>();
   rows.forEach((row, index) => {
     const word = rowToWord(row);
     if (!word) return;
     if (index === 0 && isHeaderRow(word.term, word.meaning.split(',')[0].trim())) return;
+    const key = word.term.toLowerCase();
+    const existing = byKey.get(key);
+    if (existing) {
+      mergeInto(existing, word);
+      return;
+    }
+    byKey.set(key, word);
     words.push(word);
   });
   return words;

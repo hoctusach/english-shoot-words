@@ -14,9 +14,13 @@ initAnalytics();
 track('open', { mode: isStandalone() ? 'app' : 'browser', lang: getLang() });
 startPwa(() => track('install'));
 
-seedWordSets();
-
 const app = new App(root);
-app.start();
 
-watchForNewBuilds();
+// Add any built-in sets this device hasn't had yet before the first screen, so a
+// fresh visit opens with sets to play. A device that has them all starts at once.
+void seedWordSets()
+  .catch(() => false)
+  .then(() => {
+    app.start();
+    watchForNewBuilds();
+  });

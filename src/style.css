@@ -935,9 +935,15 @@ body.game-active {
   color: var(--text);
   font-size: 12px;
   line-height: 1.25;
+  /* some lists pack a whole word family into one meaning: keep the bubble small */
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-.meaning-bubble.has-example {
+.meaning-bubble.wide {
   max-width: min(300px, calc(100% - 16px));
 }
 

@@ -1,8 +1,8 @@
 // Word sets that ship with the game, so a first visit (web or installed app) has
 // something to play right away. Each is added once per device: a player who deletes
 // one doesn't get it back, and nobody gets a second copy of words they imported.
-import moversA1Csv from './seed/movers-a1.csv?raw';
-import waysOfWalkingCsv from './seed/ways-of-walking-c1.csv?raw';
+// The word lists load on demand, only on the visit that adds them, so they don't
+// weigh down every page load.
 import { SEEDED_SETS_KEY } from '@/utils/storageKeys';
 import { wordsFromCsvText } from '@/data/wordListImport';
 import { addWordSetWithId, getLastSelectedSetId, loadWordSets, setLastSelectedSetId } from '@/data/wordSetStore';
@@ -12,7 +12,7 @@ interface SeedSet {
   id: string;
   name: string;
   fileName: string;
-  csv: string;
+  loadCsv: () => Promise<string>;
 }
 
 // Listed in the order a fresh device shows them; the first becomes the Continue set.
@@ -21,13 +21,19 @@ const SEED_SETS: SeedSet[] = [
     id: 'seed-movers-a1',
     name: 'Movers A1',
     fileName: 'movers_wordlist_a1only.csv',
-    csv: moversA1Csv,
+    loadCsv: () => import('./seed/movers-a1.csv?raw').then((m) => m.default),
   },
   {
     id: 'seed-ways-of-walking-c1',
     name: 'Ways of Walking (C1)',
     fileName: 'vocabulary-C1-WaysOfWalking.csv',
-    csv: waysOfWalkingCsv,
+    loadCsv: () => import('./seed/ways-of-walking-c1.csv?raw').then((m) => m.default),
+  },
+  {
+    id: 'seed-advanced-b2-c1',
+    name: 'Nâng cao B2–C1 (idioms, phrasal verbs)',
+    fileName: 'defaultVocabulary4_typing.csv',
+    loadCsv: () => import('./seed/advanced-b2-c1.csv?raw').then((m) => m.default),
   },
 ];
 
@@ -46,17 +52,24 @@ function sameWords(a: string[], b: string[]): boolean {
   return b.every((term) => set.has(term));
 }
 
-export function seedWordSets(): void {
-  if (typeof localStorage === 'undefined') return;
+// Resolves to true when at least one set was added.
+export async function seedWordSets(): Promise<boolean> {
+  if (typeof localStorage === 'undefined') return false;
   const seeded = loadSeeded();
-  let changed = false;
+  const pending = SEED_SETS.filter((seed) => !seeded.includes(seed.id));
+  if (pending.length === 0) return false;
 
-  for (const seed of SEED_SETS) {
-    if (seeded.includes(seed.id)) continue;
+  let addedAny = false;
+  for (const seed of pending) {
+    let csv: string;
+    try {
+      csv = await seed.loadCsv();
+    } catch {
+      continue; // offline on a first visit: try again next time
+    }
     seeded.push(seed.id);
-    changed = true;
 
-    const words = wordsFromCsvText(seed.csv);
+    const words = wordsFromCsvText(csv);
     const terms = words.map((w) => termKey(w.term));
     const alreadyImported = loadWordSets().some((set) =>
       sameWords(set.words.map((w) => termKey(w.term)), terms),
@@ -70,14 +83,16 @@ export function seedWordSets(): void {
       createdAt: new Date().toISOString(),
       sourceFileName: seed.fileName,
     });
-    if (added && !getLastSelectedSetId()) setLastSelectedSetId(seed.id);
-  }
-
-  if (changed) {
-    try {
-      localStorage.setItem(SEEDED_SETS_KEY, JSON.stringify(seeded));
-    } catch {
-      // storage full or blocked: try again next visit
+    if (added) {
+      addedAny = true;
+      if (!getLastSelectedSetId()) setLastSelectedSetId(seed.id);
     }
   }
+
+  try {
+    localStorage.setItem(SEEDED_SETS_KEY, JSON.stringify(seeded));
+  } catch {
+    // storage full or blocked: try again next visit
+  }
+  return addedAny;
 }
