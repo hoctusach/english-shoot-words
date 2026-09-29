@@ -52,7 +52,8 @@ export function renderImportScreen(root: HTMLElement, app: App): void {
       return;
     }
 
-    resultsEl.textContent = t('wordsFound', words.length, fileName);
+    const examples = words.filter((w) => w.example).length;
+    resultsEl.textContent = t('wordsFound', words.length, fileName) + (examples ? t('withExamples', examples) : '');
 
     const nameInput = document.createElement('input');
     nameInput.type = 'text';
@@ -67,7 +68,7 @@ export function renderImportScreen(root: HTMLElement, app: App): void {
       const name = nameInput.value.trim() || baseName(fileName);
       const set = createWordSet(name, words, fileName);
       setLastSelectedSetId(set.id);
-      track('set_import', { words: words.length, type: fileName.toLowerCase().endsWith('.csv') ? 'csv' : 'xlsx' });
+      track('set_import', { words: words.length, examples: words.filter((w) => w.example).length, type: fileName.toLowerCase().endsWith('.csv') ? 'csv' : 'xlsx' });
       app.showMenu();
     });
     actionsEl.appendChild(saveBtn);

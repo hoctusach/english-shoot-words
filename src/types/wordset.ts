@@ -1,6 +1,8 @@
 export interface WordSetWord {
   term: string;
   meaning: string;
+  // optional example sentence (3rd column of the imported file)
+  example?: string;
 }
 
 export interface WordSet {

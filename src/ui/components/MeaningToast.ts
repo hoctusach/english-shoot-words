@@ -1,11 +1,24 @@
 import { escapeHtml } from '@/utils/dom';
+import { termStem } from '@/data/wordListImport';
 
 export interface MeaningToastHandle {
-  show(term: string, meaning: string, x: number, y: number): void;
+  show(term: string, meaning: string, example: string | undefined, x: number, y: number): void;
   destroy(): void;
 }
 
 const VISIBLE_MS = 1600;
+// an example sentence needs time to read
+const EXAMPLE_MS_PER_CHAR = 40;
+const MAX_VISIBLE_MS = 4500;
+
+// The example with the word itself picked out ("hobbled", "strutted").
+function exampleHtml(example: string, term: string): string {
+  const safe = escapeHtml(example);
+  const stem = termStem(term).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  if (!stem) return safe;
+  return safe.replace(new RegExp(`\\b(${stem}\\w*)`, 'gi'), '<b>$1</b>');
+}
+
 const EDGE_PADDING = 8;
 
 export function createMeaningToast(container: HTMLElement): MeaningToastHandle {
@@ -16,10 +29,13 @@ export function createMeaningToast(container: HTMLElement): MeaningToastHandle {
   let hideTimeout: number | null = null;
 
   return {
-    show(term: string, meaning: string, x: number, y: number) {
+    show(term: string, meaning: string, example: string | undefined, x: number, y: number) {
+      const hasExample = !!example && example.trim() !== '';
+      el.classList.toggle('has-example', hasExample);
       el.innerHTML = `
         <span class="meaning-bubble-term">${escapeHtml(term)}</span>
         ${meaning ? `<span class="meaning-bubble-meaning">${escapeHtml(meaning)}</span>` : ''}
+        ${hasExample ? `<span class="meaning-bubble-example">${exampleHtml(example!.trim(), term)}</span>` : ''}
       `;
       el.classList.remove('visible');
       // force reflow so the fade restarts on rapid consecutive kills
@@ -39,9 +55,12 @@ export function createMeaningToast(container: HTMLElement): MeaningToastHandle {
       el.classList.add('visible');
 
       if (hideTimeout !== null) window.clearTimeout(hideTimeout);
+      const visibleMs = hasExample
+        ? Math.min(MAX_VISIBLE_MS, VISIBLE_MS + example!.length * EXAMPLE_MS_PER_CHAR)
+        : VISIBLE_MS;
       hideTimeout = window.setTimeout(() => {
         el.classList.remove('visible');
-      }, VISIBLE_MS);
+      }, visibleMs);
     },
     destroy() {
       if (hideTimeout !== null) window.clearTimeout(hideTimeout);

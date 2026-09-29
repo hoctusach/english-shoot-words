@@ -316,6 +316,7 @@ export class GameEngine {
       id: crypto.randomUUID(),
       term: word.term,
       meaning: word.meaning,
+      example: word.example,
       x,
       y: -20,
     });

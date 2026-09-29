@@ -8,9 +8,12 @@ Live: https://hoctusach.github.io/english-shoot-words/
 
 ## Import
 
-Import a `.csv` or `.xlsx` file with two columns: word, then meaning. No header row is
-needed — every row is read as one word (a leading `Word,Meaning`-style header row is
-skipped automatically if present). Each imported file is saved as a single word set that
+Import a `.csv` or `.xlsx` file with two columns: word, then meaning. An optional third
+column holds an example sentence, shown (in italics, with the word highlighted) under the
+meaning after the word is shot; leave it blank to show none. No header row is needed —
+every row is read as one word (a leading `Word,Meaning`-style header row is skipped
+automatically if present). CSV fields may be quoted, so meanings and examples can contain
+commas. Each imported file is saved as a single word set that
 you can rename afterwards from "Saved word sets".
 
 ## Saved sets

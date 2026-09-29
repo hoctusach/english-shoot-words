@@ -117,7 +117,7 @@ export function renderGameScreen(root: HTMLElement, app: App, wordSet: WordSet):
       roundScore = state.score;
       roundWords = state.wordsKilled;
     },
-    onWordKilled: (word) => meaningToast.show(word.term, word.meaning, word.x, word.y),
+    onWordKilled: (word) => meaningToast.show(word.term, word.meaning, word.example, word.x, word.y),
     onPauseChange: (paused) => {
       pauseOverlay.classList.toggle('visible', paused);
       pauseBtn.textContent = paused ? '▶' : '⏸';

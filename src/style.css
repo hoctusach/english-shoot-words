@@ -937,6 +937,27 @@ body.game-active {
   line-height: 1.25;
 }
 
+.meaning-bubble.has-example {
+  max-width: min(300px, calc(100% - 16px));
+}
+
+.meaning-bubble-example {
+  margin-top: 4px;
+  padding-top: 5px;
+  border-top: 1px solid rgba(148, 163, 184, 0.25);
+  font-family: Georgia, 'Times New Roman', serif;
+  font-style: italic;
+  font-size: 11.5px;
+  line-height: 1.35;
+  color: rgba(203, 213, 225, 0.88);
+}
+
+.meaning-bubble-example b {
+  font-style: normal;
+  font-weight: 700;
+  color: var(--accent);
+}
+
 .game-hint {
   position: absolute;
   top: 10px;

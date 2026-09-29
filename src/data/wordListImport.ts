@@ -7,55 +7,113 @@ function isHeaderRow(word: string, meaning: string): boolean {
   return HEADER_WORD_LABELS.has(word.toLowerCase()) && HEADER_MEANING_LABELS.has(meaning.toLowerCase());
 }
 
-function stripQuotes(value: string): string {
-  const trimmed = value.trim();
-  if (trimmed.length >= 2 && trimmed.startsWith('"') && trimmed.endsWith('"')) {
-    return trimmed.slice(1, -1).trim();
-  }
-  return trimmed;
+// The first word of a term with a trailing "e" dropped, so "hobble" also finds
+// "hobbled" and "stumble over" finds "stumbled".
+export function termStem(term: string): string {
+  const first = term.trim().split(/\s+/)[0] ?? '';
+  return first.length > 3 ? first.replace(/e$/i, '') : first;
 }
 
-function toWords(rows: [string, string][]): WordSetWord[] {
+// A 3rd column is an example only if it reads like a sentence; otherwise it is the
+// tail of a meaning that had an unquoted comma in it ("run,chạy, bước nhanh").
+function looksLikeSentence(text: string, term: string): boolean {
+  if (text.trim().split(/\s+/).length < 3) return false;
+  if (/[.!?]["')\]]?$/.test(text.trim())) return true;
+  const stem = termStem(term).toLowerCase();
+  return stem.length > 0 && text.toLowerCase().includes(stem);
+}
+
+export function rowToWord(fields: string[]): WordSetWord | null {
+  const cells = fields.map((field) => (field ?? '').trim());
+  const term = cells[0] ?? '';
+  if (!term) return null;
+  const rest = cells.slice(1);
+  while (rest.length > 0 && rest[rest.length - 1] === '') rest.pop();
+
+  if (rest.length >= 2 && looksLikeSentence(rest[rest.length - 1], term)) {
+    const example = rest[rest.length - 1];
+    const meaning = rest.slice(0, -1).filter(Boolean).join(', ');
+    return { term, meaning, example };
+  }
+  return { term, meaning: rest.filter(Boolean).join(', ') };
+}
+
+function toWords(rows: string[][]): WordSetWord[] {
   const words: WordSetWord[] = [];
-  rows.forEach(([rawWord, rawMeaning], index) => {
-    const term = stripQuotes(rawWord ?? '');
-    const meaning = stripQuotes(rawMeaning ?? '');
-    if (!term) return;
-    if (index === 0 && isHeaderRow(term, meaning)) return;
-    words.push({ term, meaning });
+  rows.forEach((row, index) => {
+    const word = rowToWord(row);
+    if (!word) return;
+    if (index === 0 && isHeaderRow(word.term, word.meaning.split(',')[0].trim())) return;
+    words.push(word);
   });
   return words;
 }
 
-function parseCsvText(text: string): WordSetWord[] {
-  const lines = text.split(/\r\n|\r|\n/).filter((line) => line.trim() !== '');
-  const rows: [string, string][] = lines.map((line) => {
-    const commaIndex = line.indexOf(',');
-    if (commaIndex !== -1) {
-      return [line.slice(0, commaIndex), line.slice(commaIndex + 1)];
+// RFC 4180: quoted fields may hold commas, line breaks and "" for a quote. A line with
+// no comma but with tabs is read as tab-separated.
+export function parseCsv(text: string): string[][] {
+  const source = text.replace(/^﻿/, '');
+  const rows: string[][] = [];
+  let row: string[] = [];
+  let field = '';
+  let inQuotes = false;
+  let separator = ',';
+
+  const pickSeparator = (from: number) => {
+    const end = source.slice(from).search(/\r|\n/);
+    const line = end === -1 ? source.slice(from) : source.slice(from, from + end);
+    separator = !line.includes(',') && line.includes('\t') ? '\t' : ',';
+  };
+  const endRow = () => {
+    row.push(field);
+    if (row.some((cell) => cell.trim() !== '')) rows.push(row);
+    row = [];
+    field = '';
+  };
+
+  pickSeparator(0);
+  for (let i = 0; i < source.length; i++) {
+    const ch = source[i];
+    if (inQuotes) {
+      if (ch === '"') {
+        if (source[i + 1] === '"') {
+          field += '"';
+          i++;
+        } else {
+          inQuotes = false;
+        }
+      } else {
+        field += ch;
+      }
+    } else if (ch === '"' && field.trim() === '') {
+      field = '';
+      inQuotes = true;
+    } else if (ch === separator) {
+      row.push(field);
+      field = '';
+    } else if (ch === '\n' || ch === '\r') {
+      if (ch === '\r' && source[i + 1] === '\n') i++;
+      endRow();
+      pickSeparator(i + 1);
+    } else {
+      field += ch;
     }
-    const tabIndex = line.indexOf('\t');
-    if (tabIndex !== -1) {
-      return [line.slice(0, tabIndex), line.slice(tabIndex + 1)];
-    }
-    return [line, ''];
-  });
-  return toWords(rows);
+  }
+  if (field !== '' || row.length > 0) endRow();
+  return rows;
 }
 
 async function parseXlsxFile(file: File): Promise<WordSetWord[]> {
   const XLSX = await import('xlsx');
   const buffer = await file.arrayBuffer();
   const workbook = XLSX.read(buffer, { type: 'array' });
-  const allRows: [string, string][] = [];
+  const allRows: string[][] = [];
 
   for (const sheetName of workbook.SheetNames) {
     const sheet = workbook.Sheets[sheetName];
     const sheetRows = XLSX.utils.sheet_to_json<unknown[]>(sheet, { header: 1 });
     for (const row of sheetRows) {
-      const word = row[0] !== undefined && row[0] !== null ? String(row[0]) : '';
-      const meaning = row[1] !== undefined && row[1] !== null ? String(row[1]) : '';
-      allRows.push([word, meaning]);
+      allRows.push(row.map((cell) => (cell !== undefined && cell !== null ? String(cell) : '')));
     }
   }
 
@@ -66,7 +124,7 @@ export async function parseWordListFile(file: File): Promise<WordSetWord[]> {
   const name = file.name.toLowerCase();
   if (name.endsWith('.csv')) {
     const text = await file.text();
-    return parseCsvText(text);
+    return toWords(parseCsv(text));
   }
   if (name.endsWith('.xlsx') || name.endsWith('.xls')) {
     return parseXlsxFile(file);
