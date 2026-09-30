@@ -20,14 +20,22 @@ export function formatSpeed(factor: number): string {
 }
 
 // Every word falls at the same speed — the set's difficulty only picks the
-// starting speed, and the player tunes it from there.
+// starting speed, and the player tunes it from there. Levels (every 10 words shot)
+// only speed things up a little, and stop doing so at MAX_PACE_LEVEL, so a long
+// session never runs away from a child.
+export const MAX_PACE_LEVEL = 9;
+
+function paceStep(level: number): number {
+  return Math.max(0, Math.min(level, MAX_PACE_LEVEL) - 1);
+}
+
 export function spawnIntervalMs(level: number, factor: number): number {
-  const base = Math.max(900, 2600 - level * 110);
-  return Math.max(400, Math.round(base / factor));
+  const base = Math.max(1600, 3600 - paceStep(level) * 120);
+  return Math.max(700, Math.round(base / factor));
 }
 
 export function fallSpeedPxPerSec(level: number, factor: number): number {
-  const base = 28 + level * 3.5;
+  const base = 18 + paceStep(level) * 1.5;
   return Math.round(base * factor);
 }
 
