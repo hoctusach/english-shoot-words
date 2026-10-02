@@ -6,6 +6,12 @@ before it reaches the bottom. Correct words are read aloud.
 
 Live: https://hoctusach.github.io/english-shoot-words/
 
+On phones and tablets the game shows its own English keyboard instead of opening the
+system one, so there are no suggestions, autocorrect or Vietnamese input method (Telex)
+getting in the way, and no need to switch the phone's keyboard language. A physical
+keyboard still works. Add `?osk=0` to the URL to use the system keyboard instead, or
+`?osk=1` to force the game's keyboard on a computer.
+
 ## Import
 
 Import a `.csv` or `.xlsx` file with two columns: word, then meaning. An optional third

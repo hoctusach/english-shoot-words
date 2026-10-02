@@ -98,6 +98,7 @@ export class GameEngine {
     wordSet: WordSet,
     private events: GameEngineEvents,
     private mode: GameMode = PRACTICE,
+    virtualKeyboard = false,
   ) {
     const ctx = canvas.getContext('2d');
     if (!ctx) throw new Error('Canvas 2D context unavailable');
@@ -131,6 +132,7 @@ export class GameEngine {
         this.flashInvalid();
         this.events.onSuggestionBlocked?.();
       },
+      virtualKeyboard,
     );
   }
 
@@ -149,6 +151,7 @@ export class GameEngine {
     if (paused) {
       this.draw(this.lastFrameTime);
       this.paused = true;
+      this.input.enabled = false;
       this.events.onPauseChange?.(true);
       return;
     }
@@ -157,6 +160,7 @@ export class GameEngine {
 
   destroy(): void {
     this.running = false;
+    this.input.enabled = false;
     if (this.rafId !== null) {
       cancelAnimationFrame(this.rafId);
       this.rafId = null;
@@ -195,6 +199,15 @@ export class GameEngine {
     this.input.focus();
   }
 
+  // keys from the on-screen keyboard
+  typeKey(ch: string): void {
+    this.input.type(ch);
+  }
+
+  backspaceKey(): void {
+    this.input.backspace();
+  }
+
   private handleVisibility = (): void => {
     if (document.hidden) this.pause();
   };
@@ -206,6 +219,7 @@ export class GameEngine {
   pause(): void {
     if (!this.running || this.paused) return;
     this.paused = true;
+    this.input.enabled = false;
     if (this.rafId !== null) {
       cancelAnimationFrame(this.rafId);
       this.rafId = null;
@@ -216,6 +230,7 @@ export class GameEngine {
   private resume(): void {
     if (!this.running || !this.paused) return;
     this.paused = false;
+    this.input.enabled = true;
     this.lastFrameTime = performance.now();
     this.input.focus();
     this.rafId = requestAnimationFrame(this.loop);

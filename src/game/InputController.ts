@@ -15,12 +15,18 @@ export class InputController {
   private refocusing = false;
   // the value after the last accepted input, restored when a bulk insert is refused
   private lastValue = '';
+  // virtual mode: keys are ignored while the round is paused
+  enabled = true;
 
+  // `virtual`: letters come from the game's own on-screen keyboard (and any physical
+  // keyboard) through type()/backspace(); the input is never focused, so the
+  // system keyboard never opens.
   constructor(
     private container: HTMLElement,
     private onInputChange: (value: string) => void,
     private onFocusChange?: (focused: boolean) => void,
     private onBlockedInsert?: () => void,
+    private virtual = false,
   ) {
     this.el = document.createElement('input');
     this.el.type = 'text';
@@ -30,6 +36,15 @@ export class InputController {
     this.el.setAttribute('autocorrect', 'off');
     this.el.setAttribute('inputmode', 'text');
     this.el.className = 'typing-input';
+    if (virtual) {
+      this.el.readOnly = true;
+      this.el.inputMode = 'none';
+      this.el.tabIndex = -1;
+      this.el.setAttribute('aria-hidden', 'true');
+      container.appendChild(this.el);
+      window.addEventListener('keydown', this.handlePhysicalKey);
+      return;
+    }
     this.el.addEventListener('input', this.handleInput);
     this.el.addEventListener('focus', this.handleFocus);
     this.el.addEventListener('blur', this.handleBlur);
@@ -58,6 +73,34 @@ export class InputController {
     this.onInputChange(value);
   };
 
+  // One key from the on-screen keyboard: the same as typing it into the field.
+  type(ch: string): void {
+    if (!this.enabled) return;
+    this.commit(this.lastValue + ch);
+  }
+
+  backspace(): void {
+    if (this.enabled && this.lastValue) this.commit(this.lastValue.slice(0, -1));
+  }
+
+  private commit(value: string): void {
+    this.el.value = value;
+    this.lastValue = value;
+    this.onInputChange(value);
+  }
+
+  // A tablet with a keyboard attached, or a computer forced into touch mode.
+  private handlePhysicalKey = (e: KeyboardEvent): void => {
+    if (!this.enabled || e.ctrlKey || e.metaKey || e.altKey || e.defaultPrevented) return;
+    if (e.key === 'Backspace') {
+      e.preventDefault();
+      this.backspace();
+    } else if (e.key.length === 1) {
+      e.preventDefault();
+      this.type(e.key);
+    }
+  };
+
   private handleFocus = (): void => {
     if (!this.refocusing) this.onFocusChange?.(true);
   };
@@ -82,6 +125,7 @@ export class InputController {
   // and focusing an already-focused input does not bring the keyboard back — so
   // blur first. Must run inside a tap/click handler for the keyboard to open.
   focus(): void {
+    if (this.virtual) return;
     this.refocusing = true;
     if (this.isFocused) this.el.blur();
     this.el.focus({ preventScroll: true });
@@ -103,6 +147,7 @@ export class InputController {
   }
 
   destroy(): void {
+    window.removeEventListener('keydown', this.handlePhysicalKey);
     this.el.removeEventListener('input', this.handleInput);
     this.el.removeEventListener('focus', this.handleFocus);
     this.el.removeEventListener('blur', this.handleBlur);

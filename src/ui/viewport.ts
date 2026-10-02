@@ -32,6 +32,17 @@ export function startViewportTracking(): () => void {
   };
 }
 
+// Phones and tablets type on the game's own keyboard: the system one brings
+// suggestions, autocorrect and input methods (Vietnamese Telex turns "did" into "đi"),
+// hides itself, and its language switcher steals focus mid-round. `?osk=1` / `?osk=0`
+// in the URL force it on or off.
+export function usesOnScreenKeyboard(): boolean {
+  const forced = new URLSearchParams(location.search).get('osk');
+  if (forced === '1') return true;
+  if (forced === '0') return false;
+  return window.matchMedia('(pointer: coarse)').matches;
+}
+
 const KEYBOARD_OPEN_GAP = 150;
 const KEYBOARD_CLOSED_GAP = 80;
 

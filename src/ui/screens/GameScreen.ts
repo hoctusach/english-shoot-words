@@ -6,7 +6,8 @@ import { PRACTICE } from '@/game/GameMode';
 import type { ScoreState } from '@/game/Scoring';
 import { createHUD } from '@/ui/components/HUD';
 import { createMeaningToast } from '@/ui/components/MeaningToast';
-import { startViewportTracking, watchKeyboard } from '@/ui/viewport';
+import { startViewportTracking, usesOnScreenKeyboard, watchKeyboard } from '@/ui/viewport';
+import { createOnScreenKeyboard } from '@/ui/components/OnScreenKeyboard';
 import { formatSpeed } from '@/game/DifficultyCurve';
 import { addKill, getStats } from '@/data/statsStore';
 import { recordBestScore } from '@/data/wordSetStore';
@@ -67,6 +68,9 @@ export function renderGameScreen(
 
   // No on-screen keyboard to lose on a mouse/trackpad device.
   const isTouch = window.matchMedia('(pointer: coarse)').matches;
+  // Phones and tablets type on the game's own keyboard instead of the system one.
+  const ownKeyboard = usesOnScreenKeyboard();
+  if (ownKeyboard) wrap.classList.add('has-osk');
 
   const canvasContainer = wrap.querySelector<HTMLDivElement>('.canvas-container')!;
   const pauseOverlay = wrap.querySelector<HTMLDivElement>('.pause-overlay')!;
@@ -164,7 +168,7 @@ export function renderGameScreen(
   // otherwise let words keep falling while a child looks for a way to get it back.
   // Pausing puts one big "open keyboard & play" button in front of them instead.
   const onKeyboardLost = () => {
-    if (isTouch && !engine.isPaused) {
+    if (isTouch && !ownKeyboard && !engine.isPaused) {
       pausedForKeyboard = true;
       engine.pause();
     }
@@ -178,6 +182,7 @@ export function renderGameScreen(
       onScoreChange: onScore,
       onWordKilled: (word) => meaningToast.show(word.term, word.meaning, word.example, word.x, word.y),
       onPauseChange: (paused) => {
+        osk?.setEnabled(!paused);
         pauseOverlay.classList.toggle('visible', paused);
         pauseBtn.textContent = paused ? '▶' : '⏸';
         pauseBtn.setAttribute('aria-label', paused ? t('resume') : t('pause'));
@@ -216,11 +221,22 @@ export function renderGameScreen(
       },
     },
     mode,
+    ownKeyboard,
   );
 
-  const stopKeyboardWatch = watchKeyboard((open) => {
-    if (!open) onKeyboardLost();
-  });
+  const osk = ownKeyboard
+    ? createOnScreenKeyboard(wrap, {
+        onKey: (ch) => engine.typeKey(ch),
+        onBackspace: () => engine.backspaceKey(),
+      })
+    : null;
+  osk?.setEnabled(!engine.isPaused);
+
+  const stopKeyboardWatch = ownKeyboard
+    ? () => {}
+    : watchKeyboard((open) => {
+        if (!open) onKeyboardLost();
+      });
 
   // Tapping a control must not pull focus off the typing input, or the keyboard closes.
   wrap.querySelectorAll<HTMLButtonElement>('.game-topbar button').forEach((btn) =>
@@ -274,6 +290,7 @@ export function renderGameScreen(
       engine.destroy();
       hud.destroy();
       meaningToast.destroy();
+      osk?.destroy();
       stopViewportTracking();
       document.body.classList.remove('game-active', 'game-waiting');
     },
