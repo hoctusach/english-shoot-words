@@ -3,9 +3,9 @@
 // one doesn't get it back, and nobody gets a second copy of words they imported.
 // The word lists load on demand, only on the visit that adds them, so they don't
 // weigh down every page load.
-import { SEEDED_SETS_KEY } from '@/utils/storageKeys';
+import { SEEDED_SETS_KEY, SEED_UPDATES_KEY } from '@/utils/storageKeys';
 import { wordsFromCsvText } from '@/data/wordListImport';
-import { addWordSetWithId, loadWordSets, renameWordSet } from '@/data/wordSetStore';
+import { addWordSetWithId, fillWordExamples, loadWordSets, renameWordSet } from '@/data/wordSetStore';
 import { termKey } from '@/data/progressStore';
 
 interface SeedSet {
@@ -15,6 +15,9 @@ interface SeedSet {
   previousNames?: string[];
   fileName: string;
   loadCsv: () => Promise<string>;
+  // raised when a release adds example sentences to this set; devices that already
+  // have it get them filled in once
+  examplesVersion?: number;
 }
 
 // Listed in the order a fresh device shows them.
@@ -38,6 +41,7 @@ const SEED_SETS: SeedSet[] = [
     previousNames: ['Nâng cao B2–C1 (idioms, phrasal verbs)'],
     fileName: 'defaultVocabulary4_typing.csv',
     loadCsv: () => import('./seed/advanced-b2-c1.csv?raw').then((m) => m.default),
+    examplesVersion: 1,
   },
 ];
 
@@ -70,10 +74,55 @@ function applyRenames(): void {
   }
 }
 
+function loadUpdates(): Record<string, number> {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(SEED_UPDATES_KEY) ?? '{}');
+    return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+// A built-in set that gained example sentences in a later release: fill them in on
+// devices that added the set before, keyed by term. The player's progress, scores and
+// any example they wrote themselves stay as they are. A set the player deleted, or
+// their own import of the same list, is left alone.
+async function applyExampleUpdates(): Promise<void> {
+  const done = loadUpdates();
+  const sets = loadWordSets();
+  let changed = false;
+  for (const seed of SEED_SETS) {
+    if (!seed.examplesVersion || (done[seed.id] ?? 0) >= seed.examplesVersion) continue;
+    const set = sets.find((s) => s.id === seed.id);
+    if (set && set.words.some((w) => !w.example)) {
+      let csv: string;
+      try {
+        csv = await seed.loadCsv();
+      } catch {
+        continue; // offline: try again next visit
+      }
+      const examples = new Map<string, string>();
+      for (const word of wordsFromCsvText(csv)) {
+        if (word.example) examples.set(termKey(word.term), word.example);
+      }
+      fillWordExamples(seed.id, examples, termKey);
+    }
+    done[seed.id] = seed.examplesVersion;
+    changed = true;
+  }
+  if (!changed) return;
+  try {
+    localStorage.setItem(SEED_UPDATES_KEY, JSON.stringify(done));
+  } catch {
+    // storage full or blocked: try again next visit
+  }
+}
+
 // Resolves to true when at least one set was added.
 export async function seedWordSets(): Promise<boolean> {
   if (typeof localStorage === 'undefined') return false;
   applyRenames();
+  await applyExampleUpdates();
   const seeded = loadSeeded();
   const pending = SEED_SETS.filter((seed) => !seeded.includes(seed.id));
   if (pending.length === 0) return false;

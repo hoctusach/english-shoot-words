@@ -9,3 +9,4 @@ export const SEEDED_SETS_KEY = 'shootwords.seededSets.v1';
 export const LAST_PLAYED_SET_KEY = 'shootwords.lastPlayedSetId.v1';
 export const SESSIONS_KEY = 'shootwords.sessions.v1';
 export const CHALLENGE_PREFS_KEY = 'shootwords.challengePrefs.v1';
+export const SEED_UPDATES_KEY = 'shootwords.seedUpdates.v1';

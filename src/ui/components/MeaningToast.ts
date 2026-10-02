@@ -1,5 +1,5 @@
 import { escapeHtml } from '@/utils/dom';
-import { termStem } from '@/data/wordListImport';
+import { highlightTerm } from '@/utils/highlight';
 
 export interface MeaningToastHandle {
   show(term: string, meaning: string, example: string | undefined, x: number, y: number): void;
@@ -10,14 +10,6 @@ const VISIBLE_MS = 1600;
 // an example sentence needs time to read
 const EXAMPLE_MS_PER_CHAR = 40;
 const MAX_VISIBLE_MS = 4500;
-
-// The example with the word itself picked out ("hobbled", "strutted").
-function exampleHtml(example: string, term: string): string {
-  const safe = escapeHtml(example);
-  const stem = termStem(term).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  if (!stem) return safe;
-  return safe.replace(new RegExp(`\\b(${stem}\\w*)`, 'gi'), '<b>$1</b>');
-}
 
 const EDGE_PADDING = 8;
 // meanings longer than this get the wide bubble (they are clamped to a few lines)
@@ -37,7 +29,7 @@ export function createMeaningToast(container: HTMLElement): MeaningToastHandle {
       el.innerHTML = `
         <span class="meaning-bubble-term">${escapeHtml(term)}</span>
         ${meaning ? `<span class="meaning-bubble-meaning" title="${escapeHtml(meaning)}">${escapeHtml(meaning)}</span>` : ''}
-        ${hasExample ? `<span class="meaning-bubble-example">${exampleHtml(example!.trim(), term)}</span>` : ''}
+        ${hasExample ? `<span class="meaning-bubble-example">${highlightTerm(example!.trim(), term)}</span>` : ''}
       `;
       el.classList.remove('visible');
       // force reflow so the fade restarts on rapid consecutive kills

@@ -51,6 +51,26 @@ export function addWordSetWithId(set: WordSet): boolean {
   return true;
 }
 
+// Adds example sentences to words of a set that have none (a built-in set gaining
+// examples in a later release). Examples already there, edited or not, are kept.
+// Returns how many words gained one.
+export function fillWordExamples(id: string, examples: Map<string, string>, keyOf: (term: string) => string): number {
+  const sets = loadWordSets();
+  const set = sets.find((s) => s.id === id);
+  if (!set) return 0;
+  let filled = 0;
+  for (const word of set.words) {
+    if (word.example && word.example.trim()) continue;
+    const example = examples.get(keyOf(word.term));
+    if (example) {
+      word.example = example;
+      filled++;
+    }
+  }
+  if (filled > 0) saveWordSets(sets);
+  return filled;
+}
+
 export function renameWordSet(id: string, newName: string): void {
   const sets = loadWordSets();
   const set = sets.find((s) => s.id === id);

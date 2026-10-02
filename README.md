@@ -46,11 +46,18 @@ app mid-round never loses the score.
 
 `src/data/seed/*.csv` files listed in `src/data/seedSets.ts` ship with the game (today:
 "Movers A1", 740 words; "Ways of Walking (C1)", 26 words with examples; and
-"advanced_words", 2477 idioms, phrasal verbs and word families). Each list is its own small file,
+"advanced_words", 2477 idioms, phrasal verbs and word families, each with an example
+sentence). Each list is its own small file,
 loaded only on the visit that adds it. Each device gets them once on its next
 visit, web or installed app; a player who deletes one doesn't get it back, and a set is
 skipped if the player already imported the same words. To add another, drop its CSV in
-`src/data/seed/` and add an entry with a new fixed `id`.
+`src/data/seed/` and add an entry with a new fixed `id`. When a later release adds example
+sentences to a built-in set, raise its `examplesVersion`: devices that already have the set
+get the examples filled in once (by term), keeping the player's progress and any example
+they wrote.
+
+After a word is shot, its example is shown with the word in bold, including phrases and
+their other forms: *calm **her** down*, ***was under house arrest***, ***brought up***.
 
 ## Saved sets
 
